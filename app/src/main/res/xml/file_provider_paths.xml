@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!--<external-path path="." name="root_path"/>-->
+    <external-path path="." name="android_obb"/>
+    <cache-path path="." name="cache_path_cache"/>
+</paths>
