@@ -11,12 +11,19 @@ android {
         applicationId "com.feilongproject.baassetsdownloader"
         minSdk 24
         targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        versionCode = getSelfDefinedVersion("code")
+        versionName = getSelfDefinedVersion("name")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
+        }
+    }
+
+
+    android.applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach {
+            outputFileName = "BAAssetsDownloader-v${variant.versionName}.apk"
         }
     }
 
@@ -78,4 +85,17 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
 }
 
+static def getSelfDefinedVersion(type) {
 
+
+    int today = new Date().format("yyMMddHH").toInteger()
+
+    if (type == "code") {
+        return today
+    } else if (type == "name") {
+        Process process = "git rev-parse --short HEAD".execute()
+        process.waitFor()
+        String sha1 = process.getText().trim()
+        return "$today.$sha1"
+    }
+}
