@@ -1,11 +1,11 @@
 package com.feilongproject.baassetsdownloader
 
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import java.io.File
 
 
 val packageNameMap = mapOf("globalServer" to "com.nexon.bluearchive", "jpServer" to "com.YostarJP.BlueArchive")
@@ -34,7 +35,7 @@ fun PageIndex(
 @Composable
 fun GamePackageInfo(name: String, indexSelectChange: (i: String) -> Unit) {
     val context = LocalView.current.context
-    var appInfo: AppInformation? by remember { mutableStateOf(getAppInfo(context.packageManager, packageNameMap[name]!!)) }
+    var appInfo: AppInformation? by remember { mutableStateOf(getAppInfo(context, packageNameMap[name]!!)) }
     Log.d("FLP_DEBUG", "Composable:GamePackageInfo $name")
 
     Surface(
@@ -55,7 +56,7 @@ fun GamePackageInfo(name: String, indexSelectChange: (i: String) -> Unit) {
                 }
 
                 ElevatedButton(onClick = {
-                    appInfo = getAppInfo(context.packageManager, packageNameMap[name]!!)
+                    appInfo = getAppInfo(context, packageNameMap[name]!!)
                     indexSelectChange(name)
                 }) {
                     Text(stringResource(R.string.gotoDownloadPage))
@@ -72,12 +73,10 @@ fun GamePackageInfo(name: String, indexSelectChange: (i: String) -> Unit) {
                 stringResource(R.string.packageStatus) + if (appInfo == null) stringResource(R.string.notFound)
                 else stringResource(R.string.found)
             )
-            if (appInfo == null) Text("hello world")
-            else {
+            if (appInfo != null) {
                 Text(text = stringResource(R.string.localVersionName) + appInfo!!.versionName)
                 Text(text = stringResource(R.string.localVersionCode) + appInfo!!.versionCode)
             }
-
         }
 
 
@@ -86,16 +85,16 @@ fun GamePackageInfo(name: String, indexSelectChange: (i: String) -> Unit) {
     }
 }
 
-fun getAppInfo(packageManager: PackageManager, packageName: String): AppInformation? {
+fun getAppInfo(context: Context, packageName: String): AppInformation? {
     return try {
-        AppInformation(packageManager, packageName)
+        AppInformation(context, packageName)
     } catch (e: PackageManager.NameNotFoundException) {
         Log.e("FLP_DEBUG", e.toString())
         return null
     }
 }
 
-class AppInformation(packageManager: PackageManager, packageName: String) {
+class AppInformation(context: Context, packageName: String) {
 
     private val appInfo: ApplicationInfo
     private val packInfo: PackageInfo
@@ -107,25 +106,101 @@ class AppInformation(packageManager: PackageManager, packageName: String) {
     val versionName: String
         get() = packInfo.versionName
 
-    val packageName: String
-        get() = appInfo.packageName
+    val packageLength: Long
+        get() = File(appInfo.sourceDir).length()
 
     init {
         Log.d("FLP_DEBUG", "start get AppInformation $packageName")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            appInfo = packageManager.getApplicationInfo(
+            appInfo = context.packageManager.getApplicationInfo(
                 packageName,
                 PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong())
             )
-            packInfo = packageManager.getPackageInfo(
+            packInfo = context.packageManager.getPackageInfo(
                 packageName,
                 PackageManager.PackageInfoFlags.of(PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong())
             )
         } else {
-            appInfo = packageManager.getApplicationInfo(packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES)
-            packInfo = packageManager.getPackageInfo(packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES)
+            appInfo = context.packageManager.getApplicationInfo(packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES)
+            packInfo = context.packageManager.getPackageInfo(packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES)
+
+            //getAllAppTotalSizeO(context, packageName)
         }
     }
+
+//    @SuppressLint("NewApi")
+//    fun getAllAppTotalSizeO(context: Context, pkgName: String) {
+//        val storageStatsManager: StorageStatsManager =
+//            context.getSystemService(Context.STORAGE_STATS_SERVICE) as StorageStatsManager
+//        val storageManager: StorageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+//        val storageVolumes: List<StorageVolume> = storageManager.storageVolumes
+//
+//        Log.d("FLP_DEBUG", "storageVolumes: $storageVolumes")
+//        Log.d("FLP_DEBUG", "storageVolumes.size: ${storageVolumes.size}")
+//
+//        for (storageVolume in storageVolumes) {
+//            Log.d("FLP_DEBUG", "pkgName: $pkgName")
+//
+//            val uuidStr = storageVolume.uuid
+//            Log.d("FLP_DEBUG", "uuidStr: $uuidStr")
+//
+//            val uuid: UUID = if (uuidStr == null) StorageManager.UUID_DEFAULT else UUID.fromString(uuidStr)
+//            val uid = getUid(context, pkgName)
+//            Log.d("FLP_DEBUG", "uid: $uid")
+//            val user = android.os.Process.myUserHandle();
+//            Log.d(
+//                "FLP_DEBUG",
+//                "storage:" + uuid + " : " + storageVolume.getDescription(context) + " : " + storageVolume.state
+//            );
+//            Log.d("FLP_DEBUG", "getFreeBytes: " + storageStatsManager.getFreeBytes(uuid));
+//            Log.d("FLP_DEBUG", "getTotalBytes:" + storageStatsManager.getTotalBytes(uuid));
+//            val storageStats: StorageStats = storageStatsManager.queryStatsForPackage(uuid, packageName, user);
+//
+//            Log.d("FLP_DEBUG", "storage stats for app of package name:$packageName");
+//            Log.d("FLP_DEBUG", "getAppBytes: " + storageStats.appBytes);
+//            Log.d("FLP_DEBUG", " getCacheBytes:" + storageStats.cacheBytes);
+//            Log.d("FLP_DEBUG", " getDataBytes:" + storageStats.dataBytes);
+//
+//
+////            val storageStats = storageStatsManager.queryStatsForUid(uuid, uid)
+////            Log.d("FLP_DEBUG", "appBytes: " + storageStats.appBytes.toString())
+////            Log.d("FLP_DEBUG", "cacheBytes: " + storageStats.cacheBytes.toString())
+////            Log.d("FLP_DEBUG", "dataBytes: " + storageStats.dataBytes.toString())
+//        }
+//    }
+//
+//    fun getUid(context: Context, pakName: String): Int {
+//        val pm = context.packageManager
+//        try {
+//            val ai = pm.getApplicationInfo(pakName, PackageManager.GET_META_DATA)
+//            return ai.uid
+//        } catch (e: PackageManager.NameNotFoundException) {
+//            e.printStackTrace()
+//        }
+//        return -1
+//    }
+//
+//    private fun checkUsageStats(activity: Activity): Boolean {
+//        val granted: Boolean
+//        val appOps = activity.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+//        val mode =
+//            appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), activity.packageName)
+//        if (mode == AppOpsManager.MODE_DEFAULT) {
+//            granted = activity.checkCallingOrSelfPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) ==
+//                    PackageManager.PERMISSION_GRANTED
+//        } else {
+//            granted = mode == AppOpsManager.MODE_ALLOWED
+//        }
+//        return granted
+//    }
+//
+//    fun openUsagePermissionSetting(context: Context) {
+//        val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+//        context.startActivity(intent)
+//    }
 }
 
 

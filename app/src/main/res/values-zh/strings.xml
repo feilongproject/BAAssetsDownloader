@@ -25,14 +25,14 @@
     <string name="notSelect">未选择</string>
     <string name="gotoDownloadPage">前往下载界面</string>
     <string name="loadProgress">加载进度</string>
-    <string name="loading">加载中...</string>
+    <string name="loading">加载中…</string>
     <string name="flash">刷新</string>
     <string name="serverVersionName">服务器版本名称:</string>
     <string name="serverVersionCode">"服务器版本代码: "</string>
     <string name="downloadApk">下载安装包</string>
     <string name="notFoundServerVersion">未找到服务器版本</string>
-    <string name="apkNotSameServerVersion">apk与服务器版本不匹配, 请更新安装包</string>
-    <string name="apkSameServerVersion">apk与服务器版本匹配, 无需更新</string>
+    <string name="apkNotSameServerVersion">应用与服务器版本不匹配, 请更新</string>
+    <string name="apkSameServerVersion">应用与服务器版本匹配, 无需更新</string>
     <string name="getError">获取出错</string>
     <string name="getSuccess">获取成功</string>
     <string name="TODO">还没开始做</string>
@@ -44,4 +44,7 @@
     <string name="installObb">安装数据包</string>
     <string name="obbNotSameServerVersion">数据包与服务器版本不匹配, 请更新</string>
     <string name="obbSameServerVersion">数据包与服务器版本匹配, 无需更新</string>
+    <string name="getAllPermissions">已获取所有权限</string>
+    <string name="notGetAllPermissions">未获取所有权限\n请按\"继续…\"进行授权\n或按\"强制继续\"忽略授权</string>
+    <string name="forceContinue">强制继续</string>
 </resources>

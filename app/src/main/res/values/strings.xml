@@ -24,7 +24,7 @@
     <string name="notSelect">not select</string>
     <string name="gotoDownloadPage">goto download page</string>
     <string name="loadProgress">load progress</string>
-    <string name="loading">loading...</string>
+    <string name="loading">loading…</string>
     <string name="flash">flash</string>
     <string name="serverVersionName">"server version name: "</string>
     <string name="serverVersionCode">"server version code: "</string>
@@ -43,4 +43,7 @@
     <string name="installObb">install obb data</string>
     <string name="obbNotSameServerVersion">obb bot same server version, please update obb</string>
     <string name="obbSameServerVersion">obb same server version, not to update</string>
+    <string name="getAllPermissions">already get all permissions</string>
+    <string name="notGetAllPermissions">not already get all permissions\nplease enter \"Continue…\" to grant authorization\nor enter \"Force Continue\"</string>
+    <string name="forceContinue">force continue</string>
 </resources>

@@ -4,7 +4,6 @@ import com.google.gson.annotations.SerializedName
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Streaming
 
@@ -44,14 +43,10 @@ class ServerTypes {
         @SerializedName("versionCode")
         val versionCode: String,
         @SerializedName("versionName")
-        val versionName: String
+        val versionName: String,
+        @SerializedName("obbLength")
+        val obbLength: Long,
     )
-
-/*    data class VersionCheckRequest(
-        @SerializedName("serverType")
-        val serverType: String
-    )*/
-
 }
 
 

@@ -2,6 +2,7 @@ package com.feilongproject.baassetsdownloader
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -11,17 +12,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,12 +24,19 @@ import androidx.core.view.WindowCompat
 import com.feilongproject.baassetsdownloader.ui.theme.BAAssetsDownloaderTheme
 import kotlinx.coroutines.launch
 
-val maxWidth = Modifier.fillMaxWidth()
 
+const val RequestPermissionCode = 1145141919
+val maxWidth = Modifier.fillMaxWidth()
 
 class MainActivity : ComponentActivity() {
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            Log.d("FLP_DEBUG", "isGranted: $isGranted Android version:${Build.VERSION.SDK_INT}")
+        }
+
     private var lastBackPressTime = -1L
+
     override fun onBackPressed() {
         val currentTIme = System.currentTimeMillis()
         if (lastBackPressTime == -1L || currentTIme - lastBackPressTime >= 2000) {
@@ -43,48 +45,113 @@ class MainActivity : ComponentActivity() {
         } else finish()
     }
 
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.d(
+            "FLP_DEBUG_onActivityResult",
+            "requestCode: $requestCode, resultCode: $resultCode, data:${data.toString()}"
+        )
+        if (data == null) return
+
+        when (requestCode) {
+            RequestPermissionCode -> {
+                data.data?.let {
+                    val spPath = it.path?.replace("/tree/primary:Android/", "")
+                    Log.d("FLP_DEBUG", "已授权: $spPath")
+                    showToast(this, "已授权: $spPath")
+                    grantUriPermission(
+                        packageName,
+                        it,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                    contentResolver.takePersistableUriPermission(
+                        it,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                }
+            }
+        }
+    }
+
+    private fun checkPermissions(type: String): Boolean {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+
+                val permissions = mutableListOf("obb", "data")
+                showToast(this, "检查授权列表: $permissions")
+                Log.d("FLP_DEBUG", "检查授权列表: $permissions")
+                for (uri in contentResolver.persistedUriPermissions) {
+                    val spPath = uri.uri.path?.replace("/tree/primary:Android/", "")
+                    Log.d("FLP_DEBUG", "已授权: $spPath")
+                    //if (!spPath.isNullOrEmpty())
+                    permissions.remove(spPath)
+                }
+                return if (permissions.size == 0) {
+                    Log.d("FLP_DEBUG", "已全部授权")
+                    showToast(this, "已全部授权")
+                    true
+                } else {
+                    Log.d("FLP_DEBUG", "未授权: $permissions")
+                    showToast(this, "未授权: $permissions")
+                    if (type == "request")
+                        for (u in permissions) FileUtil("/Android/$u", this).startForRoot(this)
+                    false
+                }
+
+//                if (!Environment.isExternalStorageManager()) {
+//                    val intent = Intent(ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    startActivity(intent)
+//                }
+
+//                val u = DocumentFile.fromTreeUri(
+//                    this,
+//                    Uri.parse("content://com.android.externalstorage.documents/tree/primary:Android%2F"+
+//                            "obb/document/primary:Android/obb/com.YostarJP.BlueArchive")
+//                )
+//                Log.d("FLP_DEBUG", "测试: R/W ${u?.canRead()}/${u?.canWrite()}")
+            }
+
+            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                Log.d("FLP_DEBUG", "已授权")
+                return true
+            }
+//            shouldShowRequestPermissionRationale(Manifest.permission.MANAGE_EXTERNAL_STORAGE) -> {
+//                Log.d("FLP_DEBUG", "shouldShowRequestPermissionRationale")
+//            }
+            else -> {
+                if (type == "request") requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                return false
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        val requestPermissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-                Log.d("FLP_DEBUG", "isGranted: $isGranted")
-            }
-
         setContent {
             BAAssetsDownloaderTheme {
-                when {
-                    checkSelfPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
-                        Log.d("FLP_DEBUG", "PERMISSION_GRANTED")
-                    }
-
-                    shouldShowRequestPermissionRationale(Manifest.permission.MANAGE_EXTERNAL_STORAGE) -> {
-                        Log.d("FLP_DEBUG", "shouldShowRequestPermissionRationale")
-                    }
-
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
-                        requestPermissionLauncher.launch(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
-                        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-
-                        //Android 11?
-                        //val intent = Intent(ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-                        ////intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        //context.startActivity(intent)
-                    }
-
-                    else -> {
-                        requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    }
-                }
-
+//                val intent= Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+//                startActivity(intent)
                 var showHelloWindow by remember { mutableStateOf(true) }
-                val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
 
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    if (showHelloWindow) HelloWindow(onContinueClicked = { showHelloWindow = false })
-                    else MainWindow(modifier = Modifier.fillMaxSize(), widthSizeClass)
+                    if (showHelloWindow) HelloWindow {
+
+                        if (it == "force") {
+                            showHelloWindow = false
+                            return@HelloWindow true
+                        } else {
+                            val ck = checkPermissions(it)
+                            if (ck) showHelloWindow = false
+                            return@HelloWindow ck
+                        }
+
+                    }
+                    else MainWindow(modifier = Modifier.fillMaxSize())
                 }
 
             }
@@ -95,7 +162,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainWindow(modifier: Modifier, widthSizeClass: WindowWidthSizeClass) {
+fun MainWindow(modifier: Modifier) {
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val items by remember { mutableStateOf(listOf("home", "download", "settings")) }
