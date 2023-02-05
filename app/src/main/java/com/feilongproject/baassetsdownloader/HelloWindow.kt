@@ -1,10 +1,14 @@
 package com.feilongproject.baassetsdownloader
 
+import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,40 +19,29 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun HelloWindow(
-    onContinueClicked: (type: String) -> Boolean,
+    onContinueClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var notShowPermission by remember { mutableStateOf(true) }
-        var showNotice by remember { mutableStateOf(false) }
         Text(stringResource(R.string.welcomeUse))
         Text(stringResource(R.string.app_name))
         Button(
             modifier = Modifier.padding(vertical = 24.dp),
-            onClick = {
-                notShowPermission = onContinueClicked(if (showNotice) "request" else "")
-                showNotice = true
-            }
+            onClick = onContinueClicked
         ) {
             Text(text = stringResource(R.string.continueDot))
         }
 
-        if (!notShowPermission) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             Text(
-                text = stringResource(R.string.notGetAllPermissions),
+                text = stringResource(R.string.forAndroid11HelloWindow),
                 textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.inversePrimary, shape = RoundedCornerShape(10.dp))
+                    .padding(15.dp)
             )
-            Button(
-                modifier = Modifier.padding(vertical = 24.dp),
-                onClick = { onContinueClicked("force") }
-            ) {
-                Text(text = stringResource(R.string.forceContinue))
-            }
-
-        }
-
     }
 }

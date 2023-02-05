@@ -46,4 +46,11 @@
     <string name="getAllPermissions">already get all permissions</string>
     <string name="notGetAllPermissions">not already get all permissions\nplease enter \"Continue…\" to grant authorization\nor enter \"Force Continue\"</string>
     <string name="forceContinue">force continue</string>
+    <string name="forAndroid11HelloWindow">英文懒得写, 给我换中文</string>
+    <string name="forAndroid11DownloadAssets">英文懒得写, 给我换中文</string>
+    <string name="downloadedObb">downloaded obb</string>
+    <string name="downloadedApk">downloaded apk</string>
+    <string name="installAssets">download assets</string>
+    <string name="noStoragePermission">英文懒得写, 给我换中文</string>
+    <string name="noStoragePermissionSelect">英文懒得写, 给我换中文</string>
 </resources>

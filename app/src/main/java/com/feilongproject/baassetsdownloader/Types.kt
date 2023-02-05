@@ -46,6 +46,8 @@ class ServerTypes {
         val versionName: String,
         @SerializedName("obbLength")
         val obbLength: Long,
+        @SerializedName("apkMD5")
+        val apkMD5: String,
     )
 }
 

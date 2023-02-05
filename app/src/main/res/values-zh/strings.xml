@@ -1,50 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BA资源下载器</string>
-    <string name="continueDot">继续…</string>
     <string name="welcomeUse">欢迎使用</string>
-    <string name="packageName">"包名: "</string>
-    <string name="serverName">"类型: "</string>
-    <string name="packageStatus">"状态: "</string>
-    <string name="notFound">未找到</string>
+    <string name="forAndroid11HelloWindow">注意\n为兼容安卓11及以上的存储权限\n在进行非apk下载时会弹出选择文件夹\n请直接选择该文件夹为存储目录\n若无法点击按钮请附上截图并反馈</string>
+    <string name="forAndroid11DownloadAssets">注意\n下载数据包/资源包前请务必确认打开过一次游戏\n否则在获取存储权限时会找不到数据包所在文件夹</string>
+    <string name="homePage">主页</string>
+    <string name="settings">设置</string>
     <string name="found">已找到</string>
-    <string name="localVersionName">"本地版本名称: "</string>
-    <string name="localVersionCode">"本地版本代码: "</string>
+    <string name="notFound">未找到</string>
+    <string name="error">错误</string>
+    <string name="loading">加载中…</string>
+    <string name="flash">刷新</string>
+    <string name="TODO">还没开始做</string>
+    <string name="continueDot">继续…</string>
+    <string name="pressAgainExit">再按一次退出</string>
+    <string name="forceContinue">强制继续</string>
+    <string name="loadProgress">加载进度</string>
     <string name="moreInfo">更多信息</string>
     <string name="lessInfo">更少信息</string>
     <string name="jpServer">日服</string>
     <string name="globalServer">国际服</string>
-    <string name="homePage">主页</string>
-    <string name="settings">设置</string>
-    <string name="error">错误</string>
-    <string name="download">下载</string>
-    <string name="gotoDownload">去下载</string>
-    <string name="nowSelect">"现在选择: "</string>
-    <string name="getInfo">获取详情</string>
-    <string name="pressAgainExit">再按一次退出</string>
+
+    <string name="packageName">包名: </string>
+    <string name="serverName">类型: </string>
+    <string name="packageStatus">状态: </string>
+    <string name="nowSelect">现在选择: </string>
     <string name="notSelect">未选择</string>
-    <string name="gotoDownloadPage">前往下载界面</string>
-    <string name="loadProgress">加载进度</string>
-    <string name="loading">加载中…</string>
-    <string name="flash">刷新</string>
-    <string name="serverVersionName">服务器版本名称:</string>
-    <string name="serverVersionCode">"服务器版本代码: "</string>
-    <string name="downloadApk">下载安装包</string>
-    <string name="notFoundServerVersion">未找到服务器版本</string>
-    <string name="apkNotSameServerVersion">应用与服务器版本不匹配, 请更新</string>
-    <string name="apkSameServerVersion">应用与服务器版本匹配, 无需更新</string>
-    <string name="getError">获取出错</string>
-    <string name="getSuccess">获取成功</string>
-    <string name="TODO">还没开始做</string>
-    <string name="downloadProgress">下载进度</string>
+
+    <string name="download">下载</string>
     <string name="downloading">下载中</string>
     <string name="downloaded">下载完毕</string>
+    <string name="downloadedObb">数据包下载完毕</string>
+    <string name="downloadedApk">安装包下载完毕</string>
+    <string name="downloadApk">下载安装包</string>
+    <string name="downloadProgress">下载进度</string>
     <string name="downloadStart">下载开始, 检查更新中</string>
-    <string name="installApk">安装应用</string>
+    <string name="gotoDownload">去下载</string>
+    <string name="gotoDownloadPage">前往下载界面</string>
+
+    <string name="localVersionName">本地版本名称: </string>
+    <string name="localVersionCode">本地版本代码: </string>
+    <string name="serverVersionName">服务器版本名称: </string>
+    <string name="serverVersionCode">服务器版本代码: </string>
+    <string name="notFoundServerVersion">未找到服务器版本</string>
+
+    <string name="getError">获取出错</string>
+    <string name="getSuccess">获取成功</string>
+    <string name="getInfo">获取详情</string>
+
+    <string name="installApk">安装应用包</string>
     <string name="installObb">安装数据包</string>
+    <string name="installAssets">安装资源包</string>
+
+    <string name="apkNotSameServerVersion">应用与服务器版本不匹配, 请更新</string>
+    <string name="apkSameServerVersion">应用与服务器版本匹配, 无需更新</string>
     <string name="obbNotSameServerVersion">数据包与服务器版本不匹配, 请更新</string>
     <string name="obbSameServerVersion">数据包与服务器版本匹配, 无需更新</string>
+
+    <string name="noStoragePermission">无存储权限, 请在系统设置中开启存储权限并重启应用</string>
+    <string name="noStoragePermissionSelect">无存储权限\n请在打开界面中选择文件夹保存</string>
     <string name="getAllPermissions">已获取所有权限</string>
     <string name="notGetAllPermissions">未获取所有权限\n请按\"继续…\"进行授权\n或按\"强制继续\"忽略授权</string>
-    <string name="forceContinue">强制继续</string>
 </resources>

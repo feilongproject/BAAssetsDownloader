@@ -1,11 +1,14 @@
 package com.feilongproject.baassetsdownloader
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -27,6 +30,7 @@ import kotlinx.coroutines.launch
 
 const val RequestPermissionCode = 1145141919
 val maxWidth = Modifier.fillMaxWidth()
+val externalStorageDir = Environment.getExternalStorageDirectory().toString()
 
 class MainActivity : ComponentActivity() {
 
@@ -37,19 +41,21 @@ class MainActivity : ComponentActivity() {
 
     private var lastBackPressTime = -1L
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val currentTIme = System.currentTimeMillis()
         if (lastBackPressTime == -1L || currentTIme - lastBackPressTime >= 2000) {
-            showToast(this, getString(R.string.pressAgainExit))
+            showToast(getString(R.string.pressAgainExit))
             lastBackPressTime = currentTIme
         } else finish()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d(
-            "FLP_DEBUG_onActivityResult",
-            "requestCode: $requestCode, resultCode: $resultCode, data:${data.toString()}"
+            "FLP_DEBUG",
+            "onActivityResult requestCode: $requestCode, resultCode: $resultCode, data:${data.toString()}"
         )
         if (data == null) return
 
@@ -58,7 +64,7 @@ class MainActivity : ComponentActivity() {
                 data.data?.let {
                     val spPath = it.path?.replace("/tree/primary:Android/", "")
                     Log.d("FLP_DEBUG", "已授权: $spPath")
-                    showToast(this, "已授权: $spPath")
+                    showToast("已授权: $spPath")
                     grantUriPermission(
                         packageName,
                         it,
@@ -73,55 +79,44 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun checkPermissions(type: String): Boolean {
+    private fun checkPermissions() {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                val permissions = mutableListOf("obb/com.YostarJP.BlueArchive/")
+                showToast("检查授权列表\n$permissions")
+                Log.d("FLP_DEBUG", "检查授权列表\n$permissions")
 
-                val permissions = mutableListOf("obb", "data")
-                showToast(this, "检查授权列表: $permissions")
-                Log.d("FLP_DEBUG", "检查授权列表: $permissions")
+//                ////////////
+//                FileUtil("/storage/emulated/0/Android/obb/com.YostarJP.BlueArchive/aaa/bbb/ccc.obb",this)
+//                FileUtil("/storage/emulated/0/Android/obb/com.YostarJP.BlueArchive/ddd/eee/fff/",this)
+//                if (true) return
+//                ////////////
+
                 for (uri in contentResolver.persistedUriPermissions) {
-                    val spPath = uri.uri.path?.replace("/tree/primary:Android/", "")
-                    Log.d("FLP_DEBUG", "已授权: $spPath")
-                    //if (!spPath.isNullOrEmpty())
+                    Log.d("FLP_DEBUG", "已授权${uri.uri}")
+                    val u = uri.uri.path ?: continue
+                    val spPath = Regex("(data|obb)/com.(.*)/").find(if (u.endsWith("/")) u else "$u/")?.value
                     permissions.remove(spPath)
                 }
-                return if (permissions.size == 0) {
+                if (permissions.size == 0) {
                     Log.d("FLP_DEBUG", "已全部授权")
-                    showToast(this, "已全部授权")
-                    true
+                    showToast("已全部授权")
                 } else {
-                    Log.d("FLP_DEBUG", "未授权: $permissions")
-                    showToast(this, "未授权: $permissions")
-                    if (type == "request")
-                        for (u in permissions) FileUtil("/Android/$u", this).startForRoot(this)
-                    false
+                    Log.d("FLP_DEBUG", "未授权\n$permissions")
+                    showToast("未授权\n$permissions")
                 }
-
-//                if (!Environment.isExternalStorageManager()) {
-//                    val intent = Intent(ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    startActivity(intent)
-//                }
-
-//                val u = DocumentFile.fromTreeUri(
-//                    this,
-//                    Uri.parse("content://com.android.externalstorage.documents/tree/primary:Android%2F"+
-//                            "obb/document/primary:Android/obb/com.YostarJP.BlueArchive")
-//                )
-//                Log.d("FLP_DEBUG", "测试: R/W ${u?.canRead()}/${u?.canWrite()}")
+                return
             }
 
             checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
                 Log.d("FLP_DEBUG", "已授权")
-                return true
             }
 //            shouldShowRequestPermissionRationale(Manifest.permission.MANAGE_EXTERNAL_STORAGE) -> {
 //                Log.d("FLP_DEBUG", "shouldShowRequestPermissionRationale")
 //            }
             else -> {
-                if (type == "request") requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                return false
+                Log.d("FLP_DEBUG", "准备请求授权")
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
     }
@@ -129,6 +124,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        checkPermissions()
 
         setContent {
             BAAssetsDownloaderTheme {
@@ -140,16 +136,7 @@ class MainActivity : ComponentActivity() {
 
                 Surface(modifier = Modifier.fillMaxSize()) {
                     if (showHelloWindow) HelloWindow {
-
-                        if (it == "force") {
-                            showHelloWindow = false
-                            return@HelloWindow true
-                        } else {
-                            val ck = checkPermissions(it)
-                            if (ck) showHelloWindow = false
-                            return@HelloWindow ck
-                        }
-
+                        showHelloWindow = false
                     }
                     else MainWindow(modifier = Modifier.fillMaxSize())
                 }
@@ -180,11 +167,8 @@ fun MainWindow(modifier: Modifier) {
         "download" to stringResource(R.string.download),
         "settings" to stringResource(R.string.settings)
     )
-
-
     var selectedItem by remember { mutableStateOf("home") }
     var selectServer: String? by remember { mutableStateOf(null) }
-
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -228,11 +212,11 @@ fun MainWindow(modifier: Modifier) {
                             "download" -> {
                                 if (selectServer == null) {
                                     selectedItem = "home"
-                                    showToast(LocalContext.current, stringResource(R.string.notSelect))
+                                    LocalContext.current.showToast(stringResource(R.string.notSelect))
                                 } else PageDownload(modifier, padding, selectServer!!)
                             }
 
-                            "settings" -> PageSettings(modifier, padding, selectServer)
+                            "settings" -> PageSettings(modifier, padding)
                         }
                     },
                 )
@@ -240,7 +224,12 @@ fun MainWindow(modifier: Modifier) {
         })
 }
 
+fun Context.showToast(message: String, isLong: Boolean = false) {
+    Toast.makeText(this, message, if (isLong) Toast.LENGTH_SHORT else Toast.LENGTH_SHORT).show()
+}
 
-fun showToast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT) {
-    Toast.makeText(context, message, duration).show()
+fun Context.findActivity(): Activity? {
+    if (this is Activity) return this
+    return if (this is ContextWrapper) findActivity()
+    else null
 }

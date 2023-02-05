@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun PageSettings(modifier: Modifier = Modifier, padding: PaddingValues, selectServer: String?) {
+fun PageSettings(modifier: Modifier = Modifier, padding: PaddingValues) {
 //    val names = listOf("app", "res")
 
     Column(modifier = modifier.padding(paddingValues = padding).padding(vertical = 4.dp)) {
@@ -28,7 +28,7 @@ fun PageSettings(modifier: Modifier = Modifier, padding: PaddingValues, selectSe
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("233333")
+                    Text(stringResource(R.string.TODO))
                 }
 
             }
