@@ -11,7 +11,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class ApkAssetInfo(private val context: Context, val serverType: String) {
-    private val customAPI: ServerAPI = retrofitBuild("https://assets.schale.top/").create(ServerAPI::class.java)
+    private val customAPI: ServerAPI = retrofitBuild(customApiUrl(context,"get","")).create(ServerAPI::class.java)
 
     private var localApkInfo: AppInformation? = getAppInfo(context, packageNameMap[serverType]!!)
     private val localApkLength: Long?

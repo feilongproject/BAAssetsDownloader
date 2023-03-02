@@ -67,7 +67,7 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                             },
                             label = { Text(stringResource(R.string.flash)) },
                             colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-                        )
+                        )//刷新
                         AssistChip(
                             onClick = {
                                 apkAssetInfo!!.downloadApk { p, i ->
@@ -77,7 +77,7 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                             },
                             label = { Text(stringResource(R.string.installApk)) },
                             colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-                        )
+                        )//安装包
                         if (selectServer == "jpServer") AssistChip(
                             onClick = {
                                 apkAssetInfo!!.downloadObb { p, i ->
@@ -87,7 +87,7 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                             },
                             label = { Text(stringResource(R.string.installObb)) },
                             colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-                        )
+                        )//数据包
                     }
                 }
                 Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
@@ -153,7 +153,3 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
         }
     }
 }
-
-//fun getApk() {
-////https://api.qoo-app.com/v6/apps/com.nexon.bluearchive/download?supported_abis=x86,armeabi-v7a,armeabi&sdk_version=22
-//}
