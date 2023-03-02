@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">BA资源下载器</string>
     <string name="welcomeUse">欢迎使用</string>
+    <string name="showThisWindow">显示该界面</string>
     <string name="forAndroid11HelloWindow">注意\n为兼容安卓11及以上的存储权限\n在进行非apk下载时会弹出选择文件夹\n请直接选择该文件夹为存储目录\n若无法点击按钮请附上截图并反馈</string>
     <string name="forAndroid11DownloadAssets">注意\n下载数据包/资源包前请务必确认打开过一次游戏\n否则在获取存储权限时会找不到数据包所在文件夹</string>
     <string name="homePage">主页</string>

@@ -57,24 +57,16 @@ class MainActivity : ComponentActivity() {
             "FLP_DEBUG",
             "onActivityResult requestCode: $requestCode, resultCode: $resultCode, data:${data.toString()}"
         )
-        if (data == null) return
+        if (data == null || data.data == null) return
 
         when (requestCode) {
             RequestPermissionCode -> {
-                data.data?.let {
-                    val spPath = it.path?.replace("/tree/primary:Android/", "")
-                    Log.d("FLP_DEBUG", "已授权: $spPath")
-                    showToast("已授权: $spPath")
-                    grantUriPermission(
-                        packageName,
-                        it,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    )
-                    contentResolver.takePersistableUriPermission(
-                        it,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    )
-                }
+                val spPath = data.data!!.path?.replace("/tree/primary:Android/", "")
+                Log.d("FLP_DEBUG", "已授权: $spPath")
+                showToast("已授权: $spPath")
+                val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                grantUriPermission(packageName, data.data, flag)
+                contentResolver.takePersistableUriPermission(data.data!!, flag)
             }
         }
     }
@@ -93,7 +85,7 @@ class MainActivity : ComponentActivity() {
 //                ////////////
 
                 for (uri in contentResolver.persistedUriPermissions) {
-                    Log.d("FLP_DEBUG", "已授权${uri.uri}")
+                    Log.d("FLP_DEBUG", "已授权: ${uri.uri}")
                     val u = uri.uri.path ?: continue
                     val spPath = Regex("(data|obb)/com.(.*)/").find(if (u.endsWith("/")) u else "$u/")?.value
                     permissions.remove(spPath)
@@ -132,7 +124,15 @@ class MainActivity : ComponentActivity() {
 //                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 //                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
 //                startActivity(intent)
-                var showHelloWindow by remember { mutableStateOf(true) }
+                var showHelloWindow by remember {
+                    mutableStateOf(
+                        howToShowHelloWindow(
+                            this,
+                            isSet = false,
+                            value = false
+                        )
+                    )
+                }
 
                 Surface(modifier = Modifier.fillMaxSize()) {
                     if (showHelloWindow) HelloWindow {
@@ -226,6 +226,22 @@ fun MainWindow(modifier: Modifier) {
 
 fun Context.showToast(message: String, isLong: Boolean = false) {
     Toast.makeText(this, message, if (isLong) Toast.LENGTH_SHORT else Toast.LENGTH_SHORT).show()
+}
+
+fun howToShowHelloWindow(context: Context, isSet: Boolean, value: Boolean): Boolean {
+    Log.d("FLP_DEBUG", "howToShowHelloWindow $isSet $value")
+    val perf = context.getSharedPreferences("config", Context.MODE_PRIVATE)
+    val configVersionCode = perf.getString("versionCode", "-1")
+    val appInfo = getAppInfo(context, context.packageName)
+    val localVersionCode = appInfo?.versionCode
+
+    val editor = perf.edit()
+    if (configVersionCode != localVersionCode.toString()) editor.putBoolean("showHelloWindow", true)
+    editor.putString("versionCode", (localVersionCode ?: 0L).toString())
+    if (isSet) editor.putBoolean("showHelloWindow", value)
+    editor.apply()
+
+    return perf.getBoolean("showHelloWindow", true)
 }
 
 fun Context.findActivity(): Activity? {

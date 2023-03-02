@@ -53,4 +53,5 @@
     <string name="installAssets">download assets</string>
     <string name="noStoragePermission">英文懒得写, 给我换中文</string>
     <string name="noStoragePermissionSelect">英文懒得写, 给我换中文</string>
+    <string name="showThisWindow">Show This Window</string>
 </resources>
