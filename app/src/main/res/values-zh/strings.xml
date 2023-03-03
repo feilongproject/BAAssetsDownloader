@@ -63,7 +63,8 @@
     <string name="getAllPermissions">已获取所有权限</string>
     <string name="notGetAllPermissions">未获取所有权限\n请按\"继续…\"进行授权\n或按\"强制继续\"忽略授权</string>
 
-    <string name="defaultApiUrl">默认 API 链接</string>
-    <string name="customApiUrl">自定义 API 链接</string>
+    <string name="defaultApiUrl">默认 API</string>
+    <string name="selectApiUrl">选择 API</string>
+    <string name="customApiUrl">自定义 API</string>
     <string name="typeApiUrl">输入 API 链接</string>
 </resources>

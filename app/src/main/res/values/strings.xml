@@ -54,9 +54,10 @@
     <string name="noStoragePermission">英文懒得写, 给我换中文</string>
     <string name="noStoragePermissionSelect">英文懒得写, 给我换中文</string>
     <string name="showThisWindow">Show This Window</string>
-    <string name="customApiUrl">custom API url</string>
+    <string name="customApiUrl">custom API</string>
     <string name="typeApiUrl">type API url</string>
-    <string name="defaultApiUrl">default API url</string>
+    <string name="defaultApiUrl">default API</string>
 
     <string name="defaultApiUrlLink" translatable="false">"https://assets.schale.top/"</string>
+    <string name="selectApiUrl">select API</string>
 </resources>

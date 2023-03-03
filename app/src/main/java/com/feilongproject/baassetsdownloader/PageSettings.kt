@@ -51,7 +51,7 @@ fun SettingCustomURL() {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(stringResource(R.string.customApiUrl), modifier = Modifier.padding(end = 5.dp))
+        Text(stringResource(R.string.selectApiUrl), modifier = Modifier.padding(end = 5.dp))
 
         if (selectedOption == "custom") com.feilongproject.baassetsdownloader.util.OutlinedTextField(
             value = textValue,
