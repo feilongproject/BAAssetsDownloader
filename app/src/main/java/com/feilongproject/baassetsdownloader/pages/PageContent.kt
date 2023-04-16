@@ -1,4 +1,4 @@
-package com.feilongproject.baassetsdownloader
+package com.feilongproject.baassetsdownloader.pages
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.feilongproject.baassetsdownloader.R
+import com.feilongproject.baassetsdownloader.maxWidth
 import java.io.File
 
 

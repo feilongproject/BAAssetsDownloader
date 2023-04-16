@@ -9,9 +9,13 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.text.method.LinkMovementMethod
 import android.util.Log
+import android.view.Gravity
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -23,8 +27,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.text.HtmlCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.setPadding
+import androidx.lifecycle.*
+import com.feilongproject.baassetsdownloader.pages.PageDownload
+import com.feilongproject.baassetsdownloader.pages.PageIndex
+import com.feilongproject.baassetsdownloader.pages.PageSettings
+import com.feilongproject.baassetsdownloader.pages.getAppInfo
 import com.feilongproject.baassetsdownloader.ui.theme.BAAssetsDownloaderTheme
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 
@@ -41,14 +53,6 @@ class MainActivity : ComponentActivity() {
 
     private var lastBackPressTime = -1L
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        val currentTIme = System.currentTimeMillis()
-        if (lastBackPressTime == -1L || currentTIme - lastBackPressTime >= 2000) {
-            showToast(getString(R.string.pressAgainExit))
-            lastBackPressTime = currentTIme
-        } else finish()
-    }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -57,7 +61,7 @@ class MainActivity : ComponentActivity() {
             "FLP_DEBUG",
             "onActivityResult requestCode: $requestCode, resultCode: $resultCode, data:${data.toString()}"
         )
-        if (data == null || data.data == null) return
+        if (data?.data == null) return
 
         when (requestCode) {
             RequestPermissionCode -> {
@@ -117,30 +121,47 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         checkPermissions()
+        onBackPressedDispatcher.addCallback(this) {
+            val currentTIme = System.currentTimeMillis()
+            if (currentTIme - lastBackPressTime >= 2000) {
+                showToastResId(R.string.pressAgainExit)
+                lastBackPressTime = currentTIme
+            } else finish()
+        }
+
+        var showMainWindow by mutableStateOf(howToShowHelloWindow(this, isSet = false, value = false))
+        if (!showMainWindow) {
+            MaterialAlertDialogBuilder(this)
+                .setCustomTitle(TextView(this).apply {
+                    this.setText(R.string.welcomeUse)
+                    this.gravity = Gravity.CENTER_HORIZONTAL
+                    this.setTextAppearance(android.R.style.TextAppearance_Material_DialogWindowTitle)
+                    this.setPadding(20)
+                })
+                .setView(TextView(this).apply {
+                    this.text = HtmlCompat.fromHtml(resString(R.string.helloMessage).let {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                            it + "<br><br>" + resString(R.string.forAndroid11HelloWindow)
+                        else it
+                    }, HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    this.movementMethod = LinkMovementMethod.getInstance()
+                    this.setPadding(50)
+                })
+                .setPositiveButton(resString(R.string.enter)) { _, _ -> showMainWindow = true }
+                .setNegativeButton(resString(R.string.notShowAgainEnter)) { _, _ ->
+                    showMainWindow = true
+                    howToShowHelloWindow(this, isSet = true, value = true)
+                }
+                .setCancelable(false)
+                .show()
+        }
 
         setContent {
             BAAssetsDownloaderTheme {
-//                val intent= Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-//                startActivity(intent)
-                var showHelloWindow by remember {
-                    mutableStateOf(
-                        howToShowHelloWindow(
-                            this,
-                            isSet = false,
-                            value = false
-                        )
-                    )
-                }
-
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    if (showHelloWindow) HelloWindow {
-                        showHelloWindow = false
-                    }
-                    else MainWindow(modifier = Modifier.fillMaxSize())
+                    if (showMainWindow)
+                        MainWindow(modifier = Modifier.fillMaxSize())
                 }
-
             }
         }
     }
@@ -190,43 +211,40 @@ fun MainWindow(modifier: Modifier) {
 
             }
         },
-        content = {
-            Column(Modifier.fillMaxSize()) {
-                Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            title = { Text(indexStringResourceMap[selectedItem]!!) },
-                            navigationIcon = {
-                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                    Icon(Icons.Default.Menu, null)
-                                }
-                            })
-                    },
-                    content = { padding ->
-                        when (selectedItem) {
-                            "home" -> PageIndex(modifier, padding, indexSelectChange = { i ->
-                                selectServer = i
-                                selectedItem = "download"
-                            })
-
-                            "download" -> {
-                                if (selectServer == null) {
-                                    selectedItem = "home"
-                                    LocalContext.current.showToast(stringResource(R.string.notSelect))
-                                } else PageDownload(modifier, padding, selectServer!!)
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text(indexStringResourceMap[selectedItem]!!) },
+                        navigationIcon = {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Default.Menu, null)
                             }
+                        })
+                },
+                content = { padding ->
+                    when (selectedItem) {
+                        "home" -> PageIndex(modifier, padding, indexSelectChange = { i ->
+                            selectServer = i
+                            selectedItem = "download"
+                        })
 
-                            "settings" -> PageSettings(modifier, padding)
+                        "download" -> {
+                            if (selectServer == null) {
+                                selectedItem = "home"
+                                LocalContext.current.showToastResId(R.string.notSelect)
+                            } else PageDownload(modifier, padding, selectServer!!)
                         }
-                    },
-                )
-            }
-        })
+
+                        "settings" -> PageSettings(modifier, padding)
+                    }
+                },
+            )
+        }
+    }
 }
 
-fun Context.showToast(message: String, isLong: Boolean = false) {
-    Toast.makeText(this, message, if (isLong) Toast.LENGTH_SHORT else Toast.LENGTH_SHORT).show()
-}
 
 fun howToShowHelloWindow(context: Context, isSet: Boolean, value: Boolean): Boolean {
     Log.d("FLP_DEBUG", "howToShowHelloWindow $isSet $value")
@@ -236,12 +254,26 @@ fun howToShowHelloWindow(context: Context, isSet: Boolean, value: Boolean): Bool
     val localVersionCode = appInfo?.versionCode
 
     val editor = perf.edit()
-    if (configVersionCode != localVersionCode.toString()) editor.putBoolean("showHelloWindow", true)
+    if (configVersionCode != localVersionCode.toString()) editor.putBoolean("showHelloWindow", false)
     editor.putString("versionCode", (localVersionCode ?: 0L).toString())
     if (isSet) editor.putBoolean("showHelloWindow", value)
     editor.apply()
+    Log.d("FLP_DEBUG", "howToShowHelloWindow ${perf.getBoolean("showHelloWindow", value)}")
 
-    return perf.getBoolean("showHelloWindow", true)
+    return perf.getBoolean("showHelloWindow", value)
+}
+
+
+fun Context.showToast(message: String, isLong: Boolean = false) {
+    Toast.makeText(this, message, if (isLong) Toast.LENGTH_SHORT else Toast.LENGTH_SHORT).show()
+}
+
+fun Context.showToastResId(id: Int, isLong: Boolean = false) {
+    showToast(resString(id), isLong)
+}
+
+fun Context.resString(id: Int): String {
+    return resources.getString(id)
 }
 
 fun Context.findActivity(): Activity? {

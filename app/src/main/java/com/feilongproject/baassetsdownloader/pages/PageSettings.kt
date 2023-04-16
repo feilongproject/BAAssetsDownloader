@@ -1,4 +1,4 @@
-package com.feilongproject.baassetsdownloader
+package com.feilongproject.baassetsdownloader.pages
 
 import android.content.Context
 import android.util.Log
@@ -19,6 +19,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.feilongproject.baassetsdownloader.R
+import com.feilongproject.baassetsdownloader.maxWidth
 import com.feilongproject.baassetsdownloader.util.retrofitBuild
 
 

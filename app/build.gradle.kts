@@ -7,8 +7,6 @@ import java.io.InputStreamReader
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("kapt")
-    id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
 }
 
@@ -61,13 +59,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
-        freeCompilerArgs.toMutableList().addAll(
-            listOf(
-                "-Xallow-jvm-ir-dependencies",
-                "-P",
-                "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true"
-            )
-        )
     }
 
     buildFeatures {
@@ -78,10 +69,6 @@ android {
         kotlinCompilerExtensionVersion = "1.4.2"
     }
 
-    kapt {
-        correctErrorTypes = true
-    }
-
     packagingOptions {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -90,35 +77,38 @@ android {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.0-rc01")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0-rc01")
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("com.google.dagger:hilt-android:2.45")
-    kapt("com.google.dagger:hilt-android-compiler:2.45")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20-RC")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation("androidx.core:core-ktx:1.12.0-alpha03")
+    implementation("androidx.appcompat:appcompat:1.6.1")
 
-    implementation("androidx.activity:activity-compose:1.8.0-alpha01")
-    implementation("androidx.compose.ui:ui:1.4.0-beta02")
+    implementation("androidx.activity:activity-compose:1.8.0-alpha03")
+    implementation("androidx.compose.ui:ui:1.5.0-alpha02")
     implementation("androidx.compose.compiler:compiler:1.4.3")
-    implementation("androidx.compose.material:material-icons-extended:1.3.1")
-    implementation("androidx.compose.material3:material3:1.1.0-alpha07")
-    implementation("androidx.compose.material3:material3-window-size-class:1.0.1")
-    implementation("androidx.documentfile:documentfile:1.0.1")
+    implementation("androidx.compose.material:material-icons-extended:1.4.1")
+    implementation("androidx.compose.material3:material3:1.1.0-beta02")
+    implementation("androidx.compose.material3:material3-window-size-class:1.1.0-beta02")
+    implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:adapter-rxjava2:2.9.0")
-    implementation("com.google.android.material:material:1.9.0-alpha02")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.29.1-alpha")
+    implementation("com.google.android.material:material:1.10.0-alpha01")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.29.2-rc")
+    implementation("org.lz4:lz4-java:1.8.0")
 }
 
 fun getSelfDefinedVersion(type: String): String {
 
     val today = SimpleDateFormat("yyMMddHH").format(Date())
-    return if (type == "code") today
-    else if (type == "name") {
-        val process = Runtime.getRuntime().exec("git rev-parse --short HEAD")
-        process.waitFor()
-        val sha1 = BufferedReader(InputStreamReader(process.inputStream)).readText().trim()
-        "$today.$sha1"
-    } else ""
+    return when (type) {
+        "code" -> today
+        "name" -> {
+            val process = Runtime.getRuntime().exec("git rev-parse --short HEAD")
+            process.waitFor()
+            val sha1 = BufferedReader(InputStreamReader(process.inputStream)).readText().trim()
+            "$today.$sha1"
+        }
+        else -> ""
+    }
 }

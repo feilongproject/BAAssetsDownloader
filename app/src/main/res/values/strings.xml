@@ -60,4 +60,11 @@
 
     <string name="defaultApiUrlLink" translatable="false">"https://assets.schale.top/"</string>
     <string name="selectApiUrl">select API</string>
+    <string name="quit">quit</string>
+    <string name="enter">enter</string>
+    <string name="notShowAgainEnter">not show again</string>
+    <string name="helloMessage">英文懒得写, 给我换中文</string>
+    <string name="downloadApkStart">apk download start, checking update</string>
+    <string name="downloadApkProgress">apk download progress</string>
+    <string name="downloadObbProgress">obb download progress</string>
 </resources>

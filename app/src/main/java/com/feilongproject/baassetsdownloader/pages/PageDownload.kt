@@ -1,4 +1,4 @@
-package com.feilongproject.baassetsdownloader
+package com.feilongproject.baassetsdownloader.pages
 
 import android.os.Build
 import android.util.Log
@@ -15,12 +15,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.feilongproject.baassetsdownloader.R
+import com.feilongproject.baassetsdownloader.maxWidth
 import com.feilongproject.baassetsdownloader.util.ApkAssetInfo
-import java.io.*
-import javax.net.ssl.*
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: String) {
     var assetLoadProgress by remember { mutableStateOf(0f) }
@@ -80,10 +79,10 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                         )//安装包
                         if (selectServer == "jpServer") AssistChip(
                             onClick = {
-                                apkAssetInfo!!.downloadObb { p, i ->
+                                apkAssetInfo!!.downloadObb({ p, i ->
                                     downloadProgress = p
                                     assetLoadStatus = i
-                                }
+                                })
                             },
                             label = { Text(stringResource(R.string.installObb)) },
                             colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
@@ -126,13 +125,13 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                                 stringResource(R.string.localVersionName) + (apkAssetInfo?.localVersionName
                                     ?: sNotFound)
                             )
-                            if (apkAssetInfo?.localVersionName != apkAssetInfo?.serverVersionName)
-                                Text(stringResource(R.string.apkNotSameServerVersion))
+                            if (apkAssetInfo?.needUpdateApk == true) Text(stringResource(R.string.apkNotSameServerVersion))
                             else Text(stringResource(R.string.apkSameServerVersion))
+
                             if (apkAssetInfo?.serverType == "jpServer") {
-                                if (apkAssetInfo?.localObbFile?.length == apkAssetInfo?.serverObbLength && apkAssetInfo?.serverObbLength != null) {
-                                    Text(stringResource(R.string.obbSameServerVersion))
-                                } else Text(stringResource(R.string.obbNotSameServerVersion))
+                                if (apkAssetInfo?.needUpdateObb == true) {
+                                    Text(stringResource(R.string.obbNotSameServerVersion))
+                                } else Text(stringResource(R.string.obbSameServerVersion))
                                 //Text("${apkAssetInfo?.localObbFile?.length} == ${apkAssetInfo?.serverObbLength}")
                             }
                         }

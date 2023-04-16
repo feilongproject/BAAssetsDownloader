@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BA资源下载器</string>
-    <string name="welcomeUse">欢迎使用</string>
-    <string name="showThisWindow">显示该界面</string>
-    <string name="forAndroid11HelloWindow">注意\n为兼容安卓11及以上的存储权限\n在进行非apk下载时会弹出选择文件夹\n请直接选择该文件夹为存储目录\n若无法点击按钮请附上截图并反馈</string>
-    <string name="forAndroid11DownloadAssets">注意\n下载数据包/资源包前请务必确认打开过一次游戏\n否则在获取存储权限时会找不到数据包所在文件夹</string>
+
+    <string name="welcomeUse">欢迎使用 BA资源下载器</string>
     <string name="homePage">主页</string>
     <string name="settings">设置</string>
     <string name="found">已找到</string>
@@ -19,14 +17,34 @@
     <string name="loadProgress">加载进度</string>
     <string name="moreInfo">更多信息</string>
     <string name="lessInfo">更少信息</string>
+    <string name="showThisWindow">显示该界面</string>
+    <string name="notSelect">未选择</string>
+    <string name="quit">退出</string>
+    <string name="enter">确定</string>
+    <string name="notShowAgainEnter">不再显示</string>
+
+    <string name="helloMessage"><![CDATA[
+        碧蓝档案下载器(BAAssetsDownloader/BAAD)<br>
+        是一款专门用来下载手游《碧蓝档案》资源的app。<br>
+        可下载内容包括：apk安装包/obb数据包，未来将会支持资源包。<br>
+        下载器已在<a href="https://github.com/feilongproject/BAAssestDownloader">GitHub</a>开源，
+        欢迎到<a href="https://afdian.net/a/feilongproject">爱发电平台</a>进行赞助!
+    ]]></string>
+    <string name="forAndroid11HelloWindow"><![CDATA[
+        注意: <br>
+        为兼容安卓11及以上的存储权限<br>
+        在进行非apk下载时会弹出选择文件夹<br>
+        请直接选择该文件夹为存储目录<br>
+        若无法点击按钮请附上截图并反馈
+    ]]></string>
+    <string name="forAndroid11DownloadAssets">注意\n下载数据包/资源包前请务必确认打开过一次游戏\n否则在获取存储权限时会找不到数据包所在文件夹</string>
+
     <string name="jpServer">日服</string>
     <string name="globalServer">国际服</string>
-
     <string name="packageName">包名: </string>
     <string name="serverName">类型: </string>
     <string name="packageStatus">状态: </string>
     <string name="nowSelect">现在选择: </string>
-    <string name="notSelect">未选择</string>
 
     <string name="download">下载</string>
     <string name="downloading">下载中</string>
@@ -34,7 +52,10 @@
     <string name="downloadedObb">数据包下载完毕</string>
     <string name="downloadedApk">安装包下载完毕</string>
     <string name="downloadApk">下载安装包</string>
+    <string name="downloadApkStart">apk下载开始, 检查更新中</string>
     <string name="downloadProgress">下载进度</string>
+    <string name="downloadApkProgress">安装包下载进度</string>
+    <string name="downloadObbProgress">数据包下载进度</string>
     <string name="downloadStart">下载开始, 检查更新中</string>
     <string name="gotoDownload">去下载</string>
     <string name="gotoDownloadPage">前往下载界面</string>

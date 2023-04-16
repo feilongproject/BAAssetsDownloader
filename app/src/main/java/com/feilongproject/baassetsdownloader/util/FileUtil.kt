@@ -21,7 +21,7 @@ const val intentFlag =
 const val uriAndroidPath = "content://com.android.externalstorage.documents/tree/primary%3A"
 
 class FileUtil(private val filePath: String, private val context: Context) {
-    private val fullFilePath: String = if (filePath.startsWith("/")) filePath else when (filePath.split("/")[0]) {
+    val fullFilePath: String = if (filePath.startsWith("/")) filePath else when (filePath.split("/")[0]) {
         "obb", "data" -> "/storage/emulated/0/Android/$filePath"
         "Android" -> "/storage/emulated/0/$filePath"
         else -> filePath
@@ -42,6 +42,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
     val file = File(fullFilePath)
     val md5: String
         get() {
+//            if (!file.exists()) return "1145141919"
             val stringBuilder = StringBuilder()
             val byteArray = MessageDigest
                 .getInstance("MD5")
@@ -50,7 +51,6 @@ class FileUtil(private val filePath: String, private val context: Context) {
                 val value = it
                 val hex = value.toInt() and (0xFF)
                 val hexStr = Integer.toHexString(hex)
-                println(hexStr)
                 if (hexStr.length == 1) stringBuilder.append(0).append(hexStr)
                 else stringBuilder.append(hexStr)
             }
@@ -146,7 +146,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
         return pathInfo.findFile(name)?.uri ?: pathInfo.createFile("application/octet-stream", name)?.uri
     }
 
-    fun saveToFile(totalLength: Long, inputStream: InputStream, downloadListener: DownloadListener) {
+    fun saveToFile(inputStream: InputStream, downloadListener: DownloadListener) {
         Log.d("FLP_DEBUG", "saveToFile: $fullFilePath highVersionFix: $highVersionFix")
         var len: Int
         var currentLength: Long = 0
@@ -158,32 +158,27 @@ class FileUtil(private val filePath: String, private val context: Context) {
                 context.contentResolver.openFileDescriptor(findUri, "w")
                     ?: return downloadListener.onFailure("not openFileDescriptor $fullFilePath")
             } else null
-
-
             val outputStream: FileOutputStream = if (highVersionFix && fd != null) {
                 FileOutputStream(fd.fileDescriptor)
             } else {
-                Log.d("FLP_DEBUG","file: $file\nfile.parentFile:${file.parentFile}")
+                Log.d("FLP_DEBUG", "file: $file\nfile.parentFile:${file.parentFile}")
                 file.parentFile?.mkdirs()
                 FileOutputStream(file)
             }
-
             val buff = ByteArray(1024 * 1024) //设置buff块大小
+
             while ((inputStream.read(buff).also { len = it }) != -1) {
                 Log.d("FLP_Download", "当前进度: $currentLength")
                 outputStream.write(buff, 0, len)
                 currentLength += len
 
                 //计算当前下载百分比，并经由回调传出
-                downloadListener.onProgress(currentLength.toFloat() / totalLength.toFloat())
-
-                //当百分比为100时下载结束，调用结束回调，并传出下载后的本地路径
-                if (currentLength == totalLength) {
-                    fd?.close()
-                    outputStream.close()
-                    downloadListener.onFinish(this) //下载完成
-                }
+                downloadListener.onProgress(currentLength)
             }
+
+            fd?.close()
+            outputStream.close()
+            downloadListener.onFinish() //下载完成
         } catch (e: Throwable) {
             e.printStackTrace()
             Log.e("FLP_DEBUG1", e.toString())
@@ -200,13 +195,13 @@ class FileUtil(private val filePath: String, private val context: Context) {
 
     }
 
-    fun checkPermission(): Boolean {
+    fun checkPermission(requirePermission: Boolean = true): Boolean {
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
                 //Log.d("FLP_DEBUG","isExternalStorage: $isExternalStorage fullFilePath: $fullFilePath")
                 if (!isExternalStorage) return true
                 if (docPath?.canRead() == true && docPath?.canWrite()!!) return true
-                requestSAFPermission()
+                if (requirePermission) requestSAFPermission()
                 false
             }
 
@@ -215,7 +210,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
             }
 
             else -> {
-                context.showToast(context.getString(R.string.noStoragePermission), true)
+                context.showToastResId(R.string.noStoragePermission, true)
                 val intent = Intent()
                 intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                 intent.data = Uri.parse("package:${context.packageName}")
@@ -233,7 +228,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
         val documentFile: DocumentFile = Uri
             .parse(uriAndroidPath + ("Android/$rex").replace("/", "%2F"))
             .let { DocumentFile.fromTreeUri(act, it) } ?: return
-        context.showToast(context.getString(R.string.noStoragePermissionSelect))
+        context.showToastResId(R.string.noStoragePermissionSelect)
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         intent.flags = intentFlag
         intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, documentFile.uri)
