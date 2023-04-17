@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.method.LinkMovementMethod
 import android.util.Log
-import android.view.Gravity
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -27,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.setPadding
@@ -36,7 +36,6 @@ import com.feilongproject.baassetsdownloader.pages.PageIndex
 import com.feilongproject.baassetsdownloader.pages.PageSettings
 import com.feilongproject.baassetsdownloader.pages.getAppInfo
 import com.feilongproject.baassetsdownloader.ui.theme.BAAssetsDownloaderTheme
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 
@@ -130,33 +129,42 @@ class MainActivity : ComponentActivity() {
         }
 
         var showMainWindow by mutableStateOf(howToShowHelloWindow(this, isSet = false, value = false))
-        if (!showMainWindow) {
-            MaterialAlertDialogBuilder(this)
-                .setCustomTitle(TextView(this).apply {
-                    this.setText(R.string.welcomeUse)
-                    this.gravity = Gravity.CENTER_HORIZONTAL
-                    this.setTextAppearance(android.R.style.TextAppearance_Material_DialogWindowTitle)
-                    this.setPadding(20)
-                })
-                .setView(TextView(this).apply {
-                    this.text = HtmlCompat.fromHtml(resString(R.string.helloMessage).let {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-                            it + "<br><br>" + resString(R.string.forAndroid11HelloWindow)
-                        else it
-                    }, HtmlCompat.FROM_HTML_MODE_LEGACY)
-                    this.movementMethod = LinkMovementMethod.getInstance()
-                    this.setPadding(50)
-                })
-                .setPositiveButton(resString(R.string.enter)) { _, _ -> showMainWindow = true }
-                .setNegativeButton(resString(R.string.notShowAgainEnter)) { _, _ ->
-                    showMainWindow = true
-                    howToShowHelloWindow(this, isSet = true, value = true)
-                }
-                .setCancelable(false)
-                .show()
-        }
 
         setContent {
+            if (!showMainWindow) {
+                AlertDialog(
+                    onDismissRequest = { },
+                    title = { Text(stringResource(R.string.welcomeUse)) },
+                    text = {
+                        val textColor = MaterialTheme.colorScheme.onPrimaryContainer.hashCode()
+                        val linkColor = MaterialTheme.colorScheme.primary.hashCode()
+                        AndroidView(
+                            factory = { context ->
+                                TextView(context).apply {
+                                    text = HtmlCompat.fromHtml(resString(R.string.helloMessage).let {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                                            it + "<br><br>" + resString(R.string.forAndroid11HelloWindow)
+                                        else it
+                                    }, HtmlCompat.FROM_HTML_MODE_LEGACY)
+                                    movementMethod = LinkMovementMethod.getInstance()
+                                    setPadding(50)
+                                    setTextColor(textColor)
+                                    setLinkTextColor(linkColor)
+                                }
+                            }
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showMainWindow = true }) { Text(stringResource(R.string.enter)) }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showMainWindow = true
+                            howToShowHelloWindow(this, isSet = true, value = true)
+                        }) { Text(stringResource(R.string.notShowAgainEnter)) }
+                    }
+                )
+            }
             BAAssetsDownloaderTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     if (showMainWindow)
