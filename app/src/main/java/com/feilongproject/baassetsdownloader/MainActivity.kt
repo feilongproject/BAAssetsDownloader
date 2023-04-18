@@ -36,6 +36,9 @@ import com.feilongproject.baassetsdownloader.pages.PageIndex
 import com.feilongproject.baassetsdownloader.pages.PageSettings
 import com.feilongproject.baassetsdownloader.pages.getAppInfo
 import com.feilongproject.baassetsdownloader.ui.theme.BAAssetsDownloaderTheme
+import com.microsoft.appcenter.AppCenter
+import com.microsoft.appcenter.analytics.Analytics
+import com.microsoft.appcenter.crashes.Crashes
 import kotlinx.coroutines.launch
 
 
@@ -205,9 +208,7 @@ fun MainWindow(modifier: Modifier) {
                 items.forEach { item ->
                     NavigationDrawerItem(
                         icon = { Icon(indexIconMap[item]!!, contentDescription = item) },
-                        label = {
-                            Text(indexStringResourceMap[item]!!)
-                        },
+                        label = { Text(indexStringResourceMap[item]!!) },
                         selected = selectedItem == item,
                         onClick = {
                             scope.launch { drawerState.close() }

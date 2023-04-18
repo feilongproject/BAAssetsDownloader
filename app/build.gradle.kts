@@ -77,13 +77,15 @@ android {
 }
 
 dependencies {
+    implementation("com.microsoft.appcenter:appcenter-analytics:4.4.5")
+    implementation("com.microsoft.appcenter:appcenter-crashes:4.4.5")
+
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20-RC")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-    implementation("androidx.core:core-ktx:1.12.0-alpha03")
     implementation("androidx.appcompat:appcompat:1.7.0-alpha02")
-
     implementation("androidx.activity:activity-compose:1.8.0-alpha03")
+    implementation("androidx.core:core-ktx:1.12.0-alpha03")
     implementation("androidx.compose.ui:ui:1.5.0-alpha02")
     implementation("androidx.compose.compiler:compiler:1.4.3")
     implementation("androidx.compose.material:material-icons-extended:1.4.1")
@@ -109,6 +111,7 @@ fun getSelfDefinedVersion(type: String): String {
             val sha1 = BufferedReader(InputStreamReader(process.inputStream)).readText().trim()
             "$today.$sha1"
         }
+
         else -> ""
     }
 }

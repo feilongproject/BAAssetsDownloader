@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.feilongproject.baassetsdownloader.R
 import com.feilongproject.baassetsdownloader.maxWidth
+import com.feilongproject.baassetsdownloader.showToast
 import com.feilongproject.baassetsdownloader.util.ApkAssetInfo
 
 
@@ -50,6 +51,12 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                         Text(
                             stringResource(R.string.nowSelect) + stringResource(if (selectServer == "jpServer") R.string.jpServer else R.string.globalServer)
                         )
+                        Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
+                        Text(stringResource(R.string.downloadHelp))
+                        Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
+                        Text(stringResource(if (selectServer == "jpServer") R.string.downloadHelpJp else R.string.downloadHelpGlobal))
+
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BASE) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
                             Text(stringResource(R.string.forAndroid11DownloadAssets))
@@ -77,7 +84,8 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                             label = { Text(stringResource(R.string.installApk)) },
                             colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
                         )//安装包
-                        if (selectServer == "jpServer") AssistChip(
+                        AssistChip(
+                            enabled = selectServer == "jpServer",
                             onClick = {
                                 apkAssetInfo!!.downloadObb({ p, i ->
                                     downloadProgress = p
@@ -87,6 +95,18 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                             label = { Text(stringResource(R.string.installObb)) },
                             colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
                         )//数据包
+                        AssistChip(
+                            enabled = false,
+                            onClick = {
+                                context.showToast("资源包下载正在TODO中, 在写了在写了")
+//                                apkAssetInfo!!.downloadAssets { p, i ->
+//                                    downloadProgress = p
+//                                    assetLoadStatus = i
+//                                }
+                            },
+                            label = { Text(stringResource(R.string.installAssets)) },
+                            colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+                        )//TODO: 资源包
                     }
                 }
                 Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))

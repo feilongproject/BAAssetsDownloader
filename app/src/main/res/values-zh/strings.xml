@@ -22,6 +22,7 @@
     <string name="quit">退出</string>
     <string name="enter">确定</string>
     <string name="notShowAgainEnter">不再显示</string>
+    <string name="help">帮助</string>
 
     <string name="helloMessage"><![CDATA[
         碧蓝档案下载器(BAAssetsDownloader/BAAD)<br>
@@ -37,14 +38,25 @@
         请直接选择该文件夹为存储目录<br>
         若无法点击按钮请附上截图并反馈
     ]]></string>
-    <string name="forAndroid11DownloadAssets">注意\n下载数据包/资源包前请务必确认打开过一次游戏\n否则在获取存储权限时会找不到数据包所在文件夹</string>
+    <string name="forAndroid11DownloadAssets">
+        注意: \n
+        安卓11及以上设备由于储存权限更改，\n
+        下载数据包/资源包前请务必确认打开过一次游戏，\n
+        否则在获取存储权限时会找不到数据包所在文件夹
+    </string>
+    <string name="downloadHelp">
+        如果遇到下载失败的问题 (如 Connection reset 等) 请使用科学上网方式加速下载。\n
+        资源包下载正在TODO中，等待后续开发
+    </string>
+    <string name="downloadHelpJp">日服需要同时安装\n应用包(apk)与数据包(obb)</string>
+    <string name="downloadHelpGlobal">国际服只需安装应用包(apk)</string>
 
     <string name="jpServer">日服</string>
     <string name="globalServer">国际服</string>
-    <string name="packageName">包名: </string>
-    <string name="serverName">类型: </string>
-    <string name="packageStatus">状态: </string>
-    <string name="nowSelect">现在选择: </string>
+    <string name="packageName">包名:</string>
+    <string name="serverName">类型:</string>
+    <string name="packageStatus">状态:</string>
+    <string name="nowSelect">现在选择:</string>
 
     <string name="download">下载</string>
     <string name="downloading">下载中</string>
@@ -60,10 +72,10 @@
     <string name="gotoDownload">去下载</string>
     <string name="gotoDownloadPage">前往下载界面</string>
 
-    <string name="localVersionName">本地版本名称: </string>
-    <string name="localVersionCode">本地版本代码: </string>
-    <string name="serverVersionName">服务器版本名称: </string>
-    <string name="serverVersionCode">服务器版本代码: </string>
+    <string name="localVersionName">本地版本名称:</string>
+    <string name="localVersionCode">本地版本代码:</string>
+    <string name="serverVersionName">服务器版本名称:</string>
+    <string name="serverVersionCode">服务器版本代码:</string>
     <string name="notFoundServerVersion">未找到服务器版本</string>
 
     <string name="getError">获取出错</string>
@@ -71,8 +83,8 @@
     <string name="getInfo">获取详情</string>
 
     <string name="installApk">安装应用包</string>
-    <string name="installObb">安装数据包</string>
-    <string name="installAssets">安装资源包</string>
+    <string name="installObb">下载数据包</string>
+    <string name="installAssets">下载资源包</string>
 
     <string name="apkNotSameServerVersion">应用与服务器版本不匹配, 请更新</string>
     <string name="apkSameServerVersion">应用与服务器版本匹配, 无需更新</string>

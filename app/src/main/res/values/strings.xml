@@ -67,4 +67,8 @@
     <string name="downloadApkStart">apk download start, checking update</string>
     <string name="downloadApkProgress">apk download progress</string>
     <string name="downloadObbProgress">obb download progress</string>
+    <string name="downloadHelpGlobal">英文懒得写, 给我换中文</string>
+    <string name="downloadHelpJp">英文懒得写, 给我换中文</string>
+    <string name="downloadHelp">英文懒得写, 给我换中文</string>
+    <string name="help">help</string>
 </resources>
