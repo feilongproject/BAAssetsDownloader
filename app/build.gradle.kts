@@ -77,8 +77,9 @@ android {
 }
 
 dependencies {
-    implementation("com.microsoft.appcenter:appcenter-analytics:4.4.5")
-    implementation("com.microsoft.appcenter:appcenter-crashes:4.4.5")
+    implementation("com.microsoft.appcenter:appcenter-analytics:5.0.1")
+    implementation("com.microsoft.appcenter:appcenter-crashes:5.0.1")
+    implementation("com.microsoft.appcenter:appcenter-distribute:5.0.1")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20-RC")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")

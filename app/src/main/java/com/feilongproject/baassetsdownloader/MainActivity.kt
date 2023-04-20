@@ -39,6 +39,7 @@ import com.feilongproject.baassetsdownloader.ui.theme.BAAssetsDownloaderTheme
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
+import  com.microsoft.appcenter.distribute.Distribute
 import kotlinx.coroutines.launch
 
 
@@ -121,6 +122,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppCenter.start(
+            application,
+            "8bf90af2-17c4-4bd1-a9fc-95f210978541",
+            Analytics::class.java,
+            Crashes::class.java,
+            Distribute::class.java,
+        )
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         checkPermissions()
         onBackPressedDispatcher.addCallback(this) {
