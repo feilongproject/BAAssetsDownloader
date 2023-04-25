@@ -12,12 +12,16 @@
 - 下载国际服与日服安装包
 - 下载日服数据包（obb）
 - ~~下载资源包（就是那个每次更新都要下载的那个）~~ （TODO中）
+- 下载器当有新版本发布时提示更新
 
 ## 这玩意在哪下载?
 - [AppCenter](https://install.appcenter.ms/users/feilongproject/apps/baad/distribution_groups/release)  
     - 主要发布渠道, 每次`main`分支更新时都会构建一次版本  
-    - 应用内自动检测更新时, 如果点击下载将会从本渠道进行
-- [蓝奏云](https://flplz.lanzoum.com/b0esq4c7c) 密码:hw1i  
+    - 自动检测下载器更新时, 如果有提示, 点击下载将会从本渠道进行
+- [QQ碧蓝档案频道](https://pd.qq.com/s/3vftwpyl0)
+    - 次要发布渠道, 也是开发者经常活跃的地方
+    - 更新基本上与`AppCenter`同步
+- [蓝奏云](https://flplz.lanzoum.com/b0esq4c7c) 密码: `hw1i`
     - 次要发布渠道, 有可能出现版本更新不及时的情况
 
 ## TODO
