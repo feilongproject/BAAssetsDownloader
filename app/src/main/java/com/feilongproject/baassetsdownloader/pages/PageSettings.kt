@@ -34,6 +34,19 @@ fun PageSettings(modifier: Modifier, padding: PaddingValues) {
         Column(modifier = maxWidth.padding(10.dp)) {
 //            Text("123456")
             SettingCustomURL()
+            Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
+
+//            Row(
+//                modifier = Modifier.fillMaxWidth().height(50.dp),
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                verticalAlignment = Alignment.CenterVertically,
+//            ) {
+//                Text(stringResource(R.string.selectApiUrl), modifier = Modifier.padding(end = 5.dp))
+//                Text(stringResource(R.string.checkUpdate), modifier = Modifier.padding(end = 5.dp).clickable {
+//                    Log.d("AppCenter", "开始版本检查")
+//                    Distribute.checkForUpdate()
+//                })
+//            }
         }
     }
 }
@@ -113,6 +126,7 @@ fun SettingCustomURL() {
 
     }
 }
+
 
 fun customApiUrl(context: Context, type: String, value: String): String {
     Log.d("FLP_DEBUG", "setApiUrl $type $value")

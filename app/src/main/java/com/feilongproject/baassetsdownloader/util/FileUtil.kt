@@ -1,17 +1,20 @@
 package com.feilongproject.baassetsdownloader.util
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Looper
 import android.provider.DocumentsContract
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
 import com.feilongproject.baassetsdownloader.*
+import com.feilongproject.baassetsdownloader.pages.packageNameMap
 import java.io.*
 import java.security.MessageDigest
 
@@ -56,10 +59,12 @@ class FileUtil(private val filePath: String, private val context: Context) {
             }
             return stringBuilder.toString()
         }
+    val canWrite: Boolean
+        get() = if (!highVersionFix) file.canWrite() else docFile?.canWrite() ?: false
     private val isExternalStorage: Boolean
         get() = (fullFilePath.startsWith(externalStorageDir))
 
-    private val highVersionFix: Boolean
+    val highVersionFix: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && isExternalStorage
 
     init {
@@ -222,17 +227,48 @@ class FileUtil(private val filePath: String, private val context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun requestSAFPermission() {
+        Log.d("FLP_DEBUG", "requestSAFPermission")
+
         val act = context.findActivity() ?: return
         val rex = Regex("(data|obb)/com.(.*)/").find(filePath)?.value ?: return
 
         val documentFile: DocumentFile = Uri
             .parse(uriAndroidPath + ("Android/$rex").replace("/", "%2F"))
             .let { DocumentFile.fromTreeUri(act, it) } ?: return
-        context.showToastResId(R.string.noStoragePermissionSelect)
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        intent.flags = intentFlag
-        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, documentFile.uri)
-        act.startActivityForResult(intent, RequestPermissionCode)
-        return
+        if (Looper.myLooper() != Looper.getMainLooper()) Looper.prepare()
+        context.findActivity()!!.runOnUiThread {
+            AlertDialog.Builder(context)
+                .setMessage(File(context.obbDir.parent, "com.YostarJP.BlueArchive").exists().let {
+                    val noStoragePermission11 = context.getString(R.string.noStoragePermission11)
+                    if (it) {
+                        noStoragePermission11
+                    } else {
+                        noStoragePermission11 + "\n\n" + context.getString(R.string.waringWithoutObbDir)
+                    }
+
+                })
+                .setNegativeButton(context.getString(R.string.selectFileDir)) { _, _ ->
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                    intent.flags = intentFlag
+                    intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, documentFile.uri)
+                    act.startActivityForResult(intent, RequestPermissionCode)
+                }
+                .setNeutralButton(context.getString(R.string.openGame)) { _, _ ->
+                    val intent =
+                        packageNameMap["jpServer"]?.let { context.packageManager.getLaunchIntentForPackage(it) }
+                    if (intent != null) {
+                        context.startActivity(intent)
+                    } else {
+                        AlertDialog.Builder(context)
+                            .setMessage(context.getString(R.string.notInstallApk))
+                            .show()
+                    }
+                }
+                .setPositiveButton(context.getString(R.string.installApk)) { _, _ ->
+                    installApplication(context, file)
+                }
+                .create()
+                .show()
+        }
     }
 }

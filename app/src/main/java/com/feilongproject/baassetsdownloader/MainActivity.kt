@@ -39,7 +39,7 @@ import com.feilongproject.baassetsdownloader.ui.theme.BAAssetsDownloaderTheme
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
-import  com.microsoft.appcenter.distribute.Distribute
+import com.microsoft.appcenter.distribute.Distribute
 import kotlinx.coroutines.launch
 
 

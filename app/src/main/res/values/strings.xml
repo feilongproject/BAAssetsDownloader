@@ -35,10 +35,9 @@
     <string name="getError">get error</string>
     <string name="getSuccess">get success</string>
     <string name="TODO">this TODO</string>
-    <string name="downloadProgress">download progress</string>
     <string name="downloading">downloading</string>
     <string name="downloaded">download finish</string>
-    <string name="downloadStart">download start, checking update</string>
+    <string name="downloadObbStart">download start, checking update</string>
     <string name="installApk">install apk</string>
     <string name="installObb">install obb data</string>
     <string name="obbNotSameServerVersion">obb bot same server version, please update obb</string>
@@ -52,7 +51,6 @@
     <string name="downloadedApk">downloaded apk</string>
     <string name="installAssets">download assets</string>
     <string name="noStoragePermission">英文懒得写, 给我换中文</string>
-    <string name="noStoragePermissionSelect">英文懒得写, 给我换中文</string>
     <string name="showThisWindow">Show This Window</string>
     <string name="customApiUrl">custom API</string>
     <string name="typeApiUrl">type API url</string>
@@ -71,4 +69,15 @@
     <string name="downloadHelpJp">英文懒得写, 给我换中文</string>
     <string name="downloadHelp">英文懒得写, 给我换中文</string>
     <string name="help">help</string>
+    <string name="checkUpdate">check update</string>
+    <string name="selectFileDir">select dir</string>
+    <string name="noStoragePermission11">英文懒得写, 给我换中文</string>
+    <string name="openGame">open game</string>
+    <string name="notFoundLocalApk">英文懒得写, 给我换中文</string>
+    <string name="waringWithoutObbDir">英文懒得写, 给我换中文</string>
+    <string name="downloadAndInstallApk">download and install apk</string>
+    <string name="notInstallApk">not install apk</string>
+    <string name="downloadApkNoNeed">download apk no need</string>
+    <string name="downloadObbNoNeed">download obb no need</string>
+    <string name="obbNotSameServerVersionWithoutPermission">obbNotSameServerVersionWithoutPermission</string>
 </resources>

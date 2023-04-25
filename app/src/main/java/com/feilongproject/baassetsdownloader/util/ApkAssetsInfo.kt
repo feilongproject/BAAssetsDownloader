@@ -1,6 +1,7 @@
 package com.feilongproject.baassetsdownloader.util
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -14,6 +15,7 @@ import com.feilongproject.baassetsdownloader.pages.getAppInfo
 import com.feilongproject.baassetsdownloader.pages.customApiUrl
 import com.feilongproject.baassetsdownloader.pages.AppInformation
 import com.feilongproject.baassetsdownloader.pages.packageNameMap
+import java.io.File
 
 class ApkAssetInfo(private val context: Context, val serverType: String) {
     private val customAPI: ServerAPI = retrofitBuild(customApiUrl(context, "get", "")).create(ServerAPI::class.java)
@@ -110,7 +112,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
     }
 
     fun downloadObb(progress: (p: Float, i: String?) -> Unit, installApkPath: FileUtil? = null) {
-        Log.d("FLP_DEBUG", "start $serverType downloadObb")
+        Log.d("FLP_DEBUG", "start $serverType downloadObb installApkPath: $installApkPath")
         progress(0f, null)
         _localObbFile = FileUtil(localObbFilePath, context)
         when {
@@ -124,15 +126,18 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                 return progress(1f, context.resString(R.string.downloadedObb))
             }  //本地存在并且长度相等时返回
             localObbFile?.checkPermission() != true -> {
-                return progress(-1f, context.getString(R.string.noStoragePermission))
+                return if (localObbFile?.highVersionFix == true)
+                    progress(-1f, context.getString(R.string.noStoragePermission11))
+                else progress(-1f, context.getString(R.string.noStoragePermission))
             }  //检查该文件是否有权限保存
         }
 
-        progress(-1f, context.resString(R.string.downloadStart))
+        progress(-1f, context.resString(R.string.downloadObbStart))
         customAPI
             .downloadObb(ServerTypes.ServerTypeRequest(serverType))
             .enqueue(downloadUtil(localObbFile!!, "obb", progress))
-        if (installApkPath != null) installApk(installApkPath, progress)
+        if ((installApkPath != null) && (installApkPath.highVersionFix))
+            installApk(installApkPath, progress)
     }
 
     private fun downloadUtil(saveFile: FileUtil, type: String, progress: (p: Float, i: String?) -> Unit) =
@@ -170,6 +175,10 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                 if ((inputStream == null) || (totalLength == null))
                     return progress(-1f, "$type inputStream:$inputStream or totalLength:$totalLength not set")
 
+                when (type) {
+                    "apk" -> if (needUpdateApk) return progress(1f, context.getString(R.string.downloadApkNoNeed))
+                    "obb" -> if (needUpdateObb) return progress(1f, context.getString(R.string.downloadObbNoNeed))
+                }
 
                 val mThread = object : Thread() {
                     override fun run() {
@@ -184,7 +193,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                                     val f = currentLength.toFloat() / totalLength.toFloat()
                                     val i = progressNotice + "%.2f%%".format(f * 100)
                                     progress(f, i)
-                                    Log.d("FLP_Download", i)
+                                    Log.d("FLP_Download", "$i $currentLength/$totalLength")
                                 }
 
                                 override fun onFinish() {
@@ -202,9 +211,11 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                                 }
                             }
                         )
-                        if (serverType == "jpServer" && type == "apk")
-                            downloadObb(progress, saveFile)
-                        if (type == "obb" && needUpdateApk) installApk(cacheApkFile, progress)
+
+                        if (type == "apk") {
+                            installApk(cacheApkFile, progress)
+                            if (serverType == "jpServer") downloadObb(progress, saveFile)
+                        }
                     }
                 }
                 mThread.start()
@@ -225,12 +236,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
         try {
             when {
                 apkFile.name.endsWith("apk") -> {
-                    val uri = FileProvider.getUriForFile(context, context.packageName + ".FileProvider", apkFile.file)
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    intent.setDataAndType(uri, "application/vnd.android.package-archive")
-                    context.startActivity(intent)
+                    installApplication(context, apkFile.file)
                 }
             }
         } catch (e: Throwable) {
@@ -238,4 +244,17 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
             progress(-1f, e.toString())
         }
     }
+}
+
+fun installApplication(context: Context, file: File): Any {
+    if (!file.exists()) return AlertDialog.Builder(context)
+        .setMessage(context.getString(R.string.notFoundLocalApk))
+        .show()
+
+    val uri = FileProvider.getUriForFile(context, context.packageName + ".FileProvider", file)
+    val intent = Intent(Intent.ACTION_VIEW)
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    intent.setDataAndType(uri, "application/vnd.android.package-archive")
+    return context.startActivity(intent)
 }

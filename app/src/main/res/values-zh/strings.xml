@@ -23,6 +23,12 @@
     <string name="enter">确定</string>
     <string name="notShowAgainEnter">不再显示</string>
     <string name="help">帮助</string>
+    <string name="checkUpdate">检查更新</string>
+    <string name="openGame">打开游戏</string>
+    <string name="getError">获取出错</string>
+    <string name="getSuccess">获取成功</string>
+    <string name="getInfo">获取详情</string>
+    <string name="notInstallApk">未安装应用</string>
 
     <string name="helloMessage"><![CDATA[
         碧蓝档案下载器(BAAssetsDownloader/BAAD)<br>
@@ -45,11 +51,13 @@
         否则在获取存储权限时会找不到数据包所在文件夹
     </string>
     <string name="downloadHelp">
-        如果遇到下载失败的问题 (如 Connection reset 等) 请使用科学上网方式加速下载。\n
+        如果遇到下载失败的问题 (如 Connection reset / timeout 等) 请使用科学上网方式加速下载。\n
         资源包下载正在TODO中，等待后续开发
     </string>
     <string name="downloadHelpJp">日服需要同时安装\n应用包(apk)与数据包(obb)</string>
     <string name="downloadHelpGlobal">国际服只需安装应用包(apk)</string>
+    <string name="notFoundLocalApk">未找到本地apk文件, 请下载安装包</string>
+    <string name="waringWithoutObbDir">注意: 检测到未打开或未安装应用, 请在安装后至少打开一次</string>
 
     <string name="jpServer">日服</string>
     <string name="globalServer">国际服</string>
@@ -65,12 +73,19 @@
     <string name="downloadedApk">安装包下载完毕</string>
     <string name="downloadApk">下载安装包</string>
     <string name="downloadApkStart">apk下载开始, 检查更新中</string>
-    <string name="downloadProgress">下载进度</string>
+    <string name="downloadObbStart">obb下载开始, 检查更新中</string>
+    <string name="downloadApkNoNeed">当前安装包版本已最新, 无需下载</string>
+    <string name="downloadObbNoNeed">当前数据包版本已最新, 无需下载</string>
     <string name="downloadApkProgress">安装包下载进度</string>
     <string name="downloadObbProgress">数据包下载进度</string>
-    <string name="downloadStart">下载开始, 检查更新中</string>
     <string name="gotoDownload">去下载</string>
     <string name="gotoDownloadPage">前往下载界面</string>
+
+    <string name="installApk">安装应用</string>
+    <string name="downloadAndInstallApk">下载并安装应用</string>
+    <string name="installObb">下载数据包</string>
+    <string name="installAssets">下载资源包</string>
+
 
     <string name="localVersionName">本地版本名称:</string>
     <string name="localVersionCode">本地版本代码:</string>
@@ -78,21 +93,20 @@
     <string name="serverVersionCode">服务器版本代码:</string>
     <string name="notFoundServerVersion">未找到服务器版本</string>
 
-    <string name="getError">获取出错</string>
-    <string name="getSuccess">获取成功</string>
-    <string name="getInfo">获取详情</string>
-
-    <string name="installApk">安装应用包</string>
-    <string name="installObb">下载数据包</string>
-    <string name="installAssets">下载资源包</string>
-
     <string name="apkNotSameServerVersion">应用与服务器版本不匹配, 请更新</string>
     <string name="apkSameServerVersion">应用与服务器版本匹配, 无需更新</string>
     <string name="obbNotSameServerVersion">数据包与服务器版本不匹配, 请更新</string>
+    <string name="obbNotSameServerVersionWithoutPermission">无权限查看数据包版本</string>
     <string name="obbSameServerVersion">数据包与服务器版本匹配, 无需更新</string>
 
-    <string name="noStoragePermission">无存储权限, 请在系统设置中开启存储权限并重启应用</string>
-    <string name="noStoragePermissionSelect">无存储权限\n请在打开界面中选择文件夹保存</string>
+    <string name="selectFileDir">选择文件夹</string>
+    <string name="noStoragePermission">无数据包存储权限, 请在系统设置中开启存储权限并重启应用</string>
+    <string name="noStoragePermission11">
+        无数据包存储权限\n
+        请在打开界面中选择文件夹保存\n\n
+        请务必保证打开过一次游戏\n
+        否则将无法选中
+    </string>
     <string name="getAllPermissions">已获取所有权限</string>
     <string name="notGetAllPermissions">未获取所有权限\n请按\"继续…\"进行授权\n或按\"强制继续\"忽略授权</string>
 

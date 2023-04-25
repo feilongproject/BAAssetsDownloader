@@ -21,6 +21,7 @@ import com.feilongproject.baassetsdownloader.showToast
 import com.feilongproject.baassetsdownloader.util.ApkAssetInfo
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: String) {
     var assetLoadProgress by remember { mutableStateOf(0f) }
@@ -42,73 +43,71 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
             modifier = maxWidth.padding(horizontal = 8.dp, vertical = 4.dp)
         ) {
             Column(modifier = maxWidth.padding(10.dp)) {
-                Row(
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.nowSelect).let {
+                        it + stringResource(if (selectServer == "jpServer") R.string.jpServer else R.string.globalServer)
+                    })
+                    AssistChip(
+                        onClick = {
+                            apkAssetInfo!!.versionCheck { p, i ->
+                                assetLoadProgress = p
+                                downloadProgress = p
+                                assetLoadStatus = i
+                            }
+                        },
+                        label = { Text(stringResource(R.string.flash)) },
+                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+                    )//刷新
+                }
+                FlowRow(
                     maxWidth,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth(0.7f).padding(end = 5.dp)) {
-                        Text(
-                            stringResource(R.string.nowSelect) + stringResource(if (selectServer == "jpServer") R.string.jpServer else R.string.globalServer)
-                        )
-                        Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
-                        Text(stringResource(R.string.downloadHelp))
-                        Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
-                        Text(stringResource(if (selectServer == "jpServer") R.string.downloadHelpJp else R.string.downloadHelpGlobal))
-
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BASE) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
-                            Text(stringResource(R.string.forAndroid11DownloadAssets))
-                        }
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        AssistChip(
-                            onClick = {
-                                apkAssetInfo!!.versionCheck { p, i ->
-                                    assetLoadProgress = p
-                                    downloadProgress = p
-                                    assetLoadStatus = i
-                                }
-                            },
-                            label = { Text(stringResource(R.string.flash)) },
-                            colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-                        )//刷新
-                        AssistChip(
-                            onClick = {
-                                apkAssetInfo!!.downloadApk { p, i ->
-                                    downloadProgress = p
-                                    assetLoadStatus = i
-                                }
-                            },
-                            label = { Text(stringResource(R.string.installApk)) },
-                            colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-                        )//安装包
-                        AssistChip(
-                            enabled = selectServer == "jpServer",
-                            onClick = {
-                                apkAssetInfo!!.downloadObb({ p, i ->
-                                    downloadProgress = p
-                                    assetLoadStatus = i
-                                })
-                            },
-                            label = { Text(stringResource(R.string.installObb)) },
-                            colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-                        )//数据包
-                        AssistChip(
-                            enabled = false,
-                            onClick = {
-                                context.showToast("资源包下载正在TODO中, 在写了在写了")
+                    AssistChip(
+                        onClick = {
+                            apkAssetInfo!!.downloadApk { p, i ->
+                                downloadProgress = p
+                                assetLoadStatus = i
+                            }
+                        },
+                        label = { Text(stringResource(R.string.downloadAndInstallApk)) },
+                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+                    )//安装包
+                    AssistChip(
+                        enabled = selectServer == "jpServer",
+                        onClick = {
+                            apkAssetInfo!!.downloadObb({ p, i ->
+                                downloadProgress = p
+                                assetLoadStatus = i
+                            })
+                        },
+                        label = { Text(stringResource(R.string.installObb)) },
+                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+                    )//数据包
+                    AssistChip(
+                        enabled = false,
+                        onClick = {
+                            context.showToast("资源包下载正在TODO中, 在写了在写了")
 //                                apkAssetInfo!!.downloadAssets { p, i ->
 //                                    downloadProgress = p
 //                                    assetLoadStatus = i
 //                                }
-                            },
-                            label = { Text(stringResource(R.string.installAssets)) },
-                            colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-                        )//TODO: 资源包
-                    }
+                        },
+                        label = { Text(stringResource(R.string.installAssets)) },
+                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+                    )//TODO: 资源包
                 }
+                Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
+                Text(stringResource(R.string.downloadHelp))
+                Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
+                Text(stringResource(if (selectServer == "jpServer") R.string.downloadHelpJp else R.string.downloadHelpGlobal))
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
+                    Text(stringResource(R.string.forAndroid11DownloadAssets))
+                }
+
+                Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
                 Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
                 Crossfade(targetState = assetLoadProgress) { p ->
                     when (p) {
@@ -150,7 +149,8 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
 
                             if (apkAssetInfo?.serverType == "jpServer") {
                                 if (apkAssetInfo?.needUpdateObb == true) {
-                                    Text(stringResource(R.string.obbNotSameServerVersion))
+                                    if (apkAssetInfo?.localObbFile?.canWrite == true) Text(stringResource(R.string.obbNotSameServerVersion))
+                                    else Text(stringResource(R.string.obbNotSameServerVersionWithoutPermission))
                                 } else Text(stringResource(R.string.obbSameServerVersion))
                                 //Text("${apkAssetInfo?.localObbFile?.length} == ${apkAssetInfo?.serverObbLength}")
                             }
