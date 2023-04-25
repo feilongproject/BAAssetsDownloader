@@ -15,6 +15,7 @@ import com.feilongproject.baassetsdownloader.pages.getAppInfo
 import com.feilongproject.baassetsdownloader.pages.customApiUrl
 import com.feilongproject.baassetsdownloader.pages.AppInformation
 import com.feilongproject.baassetsdownloader.pages.packageNameMap
+import com.microsoft.appcenter.analytics.Analytics
 import java.io.File
 
 class ApkAssetInfo(private val context: Context, val serverType: String) {
@@ -59,6 +60,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
 
     fun versionCheck(progress: (p: Float, i: String?) -> Unit) {
         Log.d("FLP_DEBUG", "start $serverType versionCheck")
+        Analytics.trackEvent("versionCheck $serverType")
         progress(0f, null)
         localApkInfo = getAppInfo(context, packageNameMap[serverType]!!)
         when (serverType) {
@@ -95,6 +97,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
 
     fun downloadApk(progress: (p: Float, i: String?) -> Unit) {
         Log.d("FLP_DEBUG", "start $serverType downloadApk")
+        Analytics.trackEvent("downloadApk $serverType")
         if (serverVersionName == null || serverVersionCode == null) {
             progress(-1f, context.resString(R.string.notFoundServerVersion))
             return context.showToastResId(R.string.notFoundServerVersion)
@@ -112,6 +115,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
     }
 
     fun downloadObb(progress: (p: Float, i: String?) -> Unit, installApkPath: FileUtil? = null) {
+        Analytics.trackEvent("downloadObb $serverType $installApkPath")
         Log.d("FLP_DEBUG", "start $serverType downloadObb installApkPath: $installApkPath")
         progress(0f, null)
         _localObbFile = FileUtil(localObbFilePath, context)
@@ -176,8 +180,8 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                     return progress(-1f, "$type inputStream:$inputStream or totalLength:$totalLength not set")
 
                 when (type) {
-                    "apk" -> if (needUpdateApk) return progress(1f, context.getString(R.string.downloadApkNoNeed))
-                    "obb" -> if (needUpdateObb) return progress(1f, context.getString(R.string.downloadObbNoNeed))
+                    "apk" -> if (!needUpdateApk) return progress(1f, context.getString(R.string.downloadApkNoNeed))
+                    "obb" -> if (!needUpdateObb) return progress(1f, context.getString(R.string.downloadObbNoNeed))
                 }
 
                 val mThread = object : Thread() {
@@ -231,6 +235,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
         }
 
     private fun installApk(apkFile: FileUtil, progress: (p: Float, i: String?) -> Unit) {
+        Analytics.trackEvent("installApk")
         if (!apkFile.exists) return
         progress(1f, context.resString(R.string.downloadedApk))
         try {
