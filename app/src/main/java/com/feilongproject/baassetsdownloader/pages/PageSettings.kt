@@ -76,8 +76,10 @@ fun SettingCustomURL() {
             },
             leadingIcon = { Icon(Icons.Default.Link, null) },
             label = { Text(stringResource(R.string.typeApiUrl)) },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
                 unfocusedLabelColor = MaterialTheme.colorScheme.primary,
                 focusedLabelColor = MaterialTheme.colorScheme.primaryContainer,
 //                    focusedBorderColor = MaterialTheme.colorScheme.outline,

@@ -94,7 +94,10 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
 //                                }
                         },
                         label = { Text(stringResource(R.string.installAssets)) },
-                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+                        colors = AssistChipDefaults.assistChipColors(
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     )//TODO: 资源包
                 }
                 Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
