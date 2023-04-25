@@ -82,7 +82,11 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                             })
                         },
                         label = { Text(stringResource(R.string.installObb)) },
-                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     )//数据包
                     AssistChip(
                         enabled = false,
@@ -96,7 +100,7 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                         label = { Text(stringResource(R.string.installAssets)) },
                         colors = AssistChipDefaults.assistChipColors(
                             disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     )//TODO: 资源包
                 }
