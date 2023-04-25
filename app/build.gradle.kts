@@ -1,5 +1,6 @@
-import java.util.Date
-import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -102,8 +103,9 @@ dependencies {
 }
 
 fun getSelfDefinedVersion(type: String): String {
-
-    val today = SimpleDateFormat("yyMMddHH").format(Date())
+    val today = LocalDateTime
+        .now(ZoneId.of("Asia/Shanghai"))
+        .format(DateTimeFormatter.ofPattern("yyMMddHH"))
     return when (type) {
         "code" -> today
         "name" -> {

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.feilongproject.baassetsdownloader.R
 import com.feilongproject.baassetsdownloader.maxWidth
 import com.feilongproject.baassetsdownloader.util.retrofitBuild
+import com.microsoft.appcenter.distribute.Distribute
 
 
 @Composable
@@ -36,17 +37,16 @@ fun PageSettings(modifier: Modifier, padding: PaddingValues) {
             SettingCustomURL()
             Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
 
-//            Row(
-//                modifier = Modifier.fillMaxWidth().height(50.dp),
-//                horizontalArrangement = Arrangement.SpaceBetween,
-//                verticalAlignment = Alignment.CenterVertically,
-//            ) {
-//                Text(stringResource(R.string.selectApiUrl), modifier = Modifier.padding(end = 5.dp))
-//                Text(stringResource(R.string.checkUpdate), modifier = Modifier.padding(end = 5.dp).clickable {
-//                    Log.d("AppCenter", "开始版本检查")
-//                    Distribute.checkForUpdate()
-//                })
-//            }
+            Row(
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(stringResource(R.string.checkUpdate), modifier = Modifier.padding(end = 5.dp).clickable {
+                    Log.d("AppCenter", "开始版本检查")
+                    Distribute.checkForUpdate()
+                })
+            }
         }
     }
 }
