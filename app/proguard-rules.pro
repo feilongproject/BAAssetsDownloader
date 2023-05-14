@@ -49,3 +49,5 @@
 
 # Gson
 -keep class com.feilongproject.baassetsdownloader.**{*;}  # com.demo.demo1.service.bean.**{*;} # 自定义数据模型的bean目录
+
+-keep class net.jpountz.**{*;}

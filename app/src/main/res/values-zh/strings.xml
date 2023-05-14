@@ -89,7 +89,7 @@
     <string name="getAssets">获取资源包信息</string>
     <string name="getAssetsNum">已获取资源数量: %d</string>
     <string name="installAssets">下载资源包</string>
-    <string name="assetsDownloadInfo">下载进度: %d/%d 失败: %d\n活动线程/最大线程: %d/%d</string>
+    <string name="assetsDownloadInfo">下载进度: %d/%d 失败次数: %d\n活动线程/最大线程: %d/%d</string>
     <string name="downloadError">下载出错正在重试 %s</string>
 
     <string name="localVersionName">本地版本名称:</string>
@@ -122,7 +122,7 @@
     <string name="typeApiUrl">输入 API 链接</string>
 
 <!--    <string name="downloadNotificationTitle">下载进度</string>-->
-    <string name="downloadNotificationContent">下载进度: %d(约)/%d 失败: %d</string>
+    <string name="downloadNotificationContent">下载进度: %d(约)/%d 失败次数: %d</string>
     <string name="downloadNotificationChannelName">显示下载进度</string>
     <string name="downloadNotificationChannelDesc">使用进度条显示当前下载进度</string>
     <string name="downloadNotificationFinish">下载完毕</string>
