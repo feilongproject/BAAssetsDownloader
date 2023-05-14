@@ -28,6 +28,7 @@
     <string name="getError">获取出错</string>
     <string name="getSuccess">获取成功</string>
     <string name="getInfo">获取详情</string>
+    <string name="getting">获取中</string>
     <string name="notInstallApk">未安装应用</string>
 
     <string name="helloMessage"><![CDATA[
@@ -50,14 +51,14 @@
         下载数据包/资源包前请务必确认打开过一次游戏，\n
         否则在获取存储权限时会找不到数据包所在文件夹
     </string>
-    <string name="downloadHelp">
-        如果遇到下载失败的问题 (如 Connection reset / timeout 等) 请使用科学上网方式加速下载。\n
-        资源包下载正在TODO中，等待后续开发
-    </string>
-    <string name="downloadHelpJp">日服需要同时安装\n应用包(apk)与数据包(obb)</string>
+    <string name="downloadHelp">如果遇到下载失败的问题(如Connection reset/timeout)请使用科学上网方式加速下载。</string>
+    <string name="downloadHelpJp">日服需要同时安装应用包(apk)与数据包(obb)</string>
     <string name="downloadHelpGlobal">国际服只需安装应用包(apk)</string>
     <string name="notFoundLocalApk">未找到本地apk文件, 请下载安装包</string>
     <string name="waringWithoutObbDir">注意: 检测到未打开或未安装应用, 请在安装后至少打开一次</string>
+    <string name="askMeOneDayLater">一天后问我</string>
+    <string name="versionUpdateDialogTitle">有新版本可更新</string>
+    <string name="changelog">更新日志</string>
 
     <string name="jpServer">日服</string>
     <string name="globalServer">国际服</string>
@@ -74,6 +75,7 @@
     <string name="downloadApk">下载安装包</string>
     <string name="downloadApkStart">apk下载开始, 检查更新中</string>
     <string name="downloadObbStart">obb下载开始, 检查更新中</string>
+    <string name="downloadBundlesStart">bundles下载开始, 检查更新中</string>
     <string name="downloadApkNoNeed">当前安装包版本已最新, 无需下载</string>
     <string name="downloadObbNoNeed">当前数据包版本已最新, 无需下载</string>
     <string name="downloadApkProgress">安装包下载进度</string>
@@ -84,8 +86,11 @@
     <string name="installApk">安装应用</string>
     <string name="downloadAndInstallApk">下载并安装应用</string>
     <string name="installObb">下载数据包</string>
+    <string name="getAssets">获取资源包信息</string>
+    <string name="getAssetsNum">已获取资源数量: %d</string>
     <string name="installAssets">下载资源包</string>
-
+    <string name="assetsDownloadInfo">下载进度: %d/%d 失败: %d\n活动线程/最大线程: %d/%d</string>
+    <string name="downloadError">下载出错正在重试 %s</string>
 
     <string name="localVersionName">本地版本名称:</string>
     <string name="localVersionCode">本地版本代码:</string>
@@ -100,7 +105,8 @@
     <string name="obbSameServerVersion">数据包与服务器版本匹配, 无需更新</string>
 
     <string name="selectFileDir">选择文件夹</string>
-    <string name="noStoragePermission">无数据包存储权限, 请在系统设置中开启存储权限并重启应用</string>
+    <string name="noStoragePermissionObb">无数据包存储权限, 请在系统设置中开启存储权限并重启应用</string>
+    <string name="noStoragePermissionBundles">无资源包存储权限, 请在系统设置中开启存储权限并重启应用</string>
     <string name="noStoragePermission11">
         无数据包存储权限\n
         请在打开界面中选择文件夹保存\n\n
@@ -114,4 +120,10 @@
     <string name="selectApiUrl">选择 API</string>
     <string name="customApiUrl">自定义 API</string>
     <string name="typeApiUrl">输入 API 链接</string>
+
+<!--    <string name="downloadNotificationTitle">下载进度</string>-->
+    <string name="downloadNotificationContent">下载进度: %d(约)/%d 失败: %d</string>
+    <string name="downloadNotificationChannelName">显示下载进度</string>
+    <string name="downloadNotificationChannelDesc">使用进度条显示当前下载进度</string>
+    <string name="downloadNotificationFinish">下载完毕</string>
 </resources>

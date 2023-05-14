@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -30,7 +31,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.setPadding
-import androidx.lifecycle.*
 import com.feilongproject.baassetsdownloader.pages.PageDownload
 import com.feilongproject.baassetsdownloader.pages.PageIndex
 import com.feilongproject.baassetsdownloader.pages.PageSettings
@@ -41,6 +41,7 @@ import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import com.microsoft.appcenter.distribute.Distribute
 import kotlinx.coroutines.launch
+import net.jpountz.xxhash.*
 
 
 const val RequestPermissionCode = 1145141919
@@ -81,7 +82,7 @@ class MainActivity : ComponentActivity() {
     private fun checkPermissions() {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
-                val permissions = mutableListOf("obb/com.YostarJP.BlueArchive/")
+                val permissions = mutableListOf("obb/com.YostarJP.BlueArchive/", "data/com.YostarJP.BlueArchive/")
                 showToast("检查授权列表\n$permissions")
                 Log.d("FLP_DEBUG", "检查授权列表\n$permissions")
 
@@ -266,21 +267,43 @@ fun MainWindow(modifier: Modifier) {
 
 fun howToShowHelloWindow(context: Context, isSet: Boolean, value: Boolean): Boolean {
     Log.d("FLP_DEBUG", "howToShowHelloWindow $isSet $value")
-    val perf = context.getSharedPreferences("config", Context.MODE_PRIVATE)
-    val configVersionCode = perf.getString("versionCode", "-1")
+    val pref = Pref(context, "config")
+    val configVersionCode = pref.getValue("versionCode", "-1")
     val appInfo = getAppInfo(context, context.packageName)
     val localVersionCode = appInfo?.versionCode
 
-    val editor = perf.edit()
-    if (configVersionCode != localVersionCode.toString()) editor.putBoolean("showHelloWindow", false)
-    editor.putString("versionCode", (localVersionCode ?: 0L).toString())
-    if (isSet) editor.putBoolean("showHelloWindow", value)
-    editor.apply()
-    Log.d("FLP_DEBUG", "howToShowHelloWindow ${perf.getBoolean("showHelloWindow", value)}")
+    if (configVersionCode != localVersionCode.toString()) pref.putValue("showHelloWindow", false)
+    pref.putValue("versionCode", (localVersionCode ?: 0L).toString())
+    if (isSet) pref.putValue("showHelloWindow", value)
 
-    return perf.getBoolean("showHelloWindow", value)
+    return pref.getValue("showHelloWindow", value)
 }
 
+class Pref(context: Context, prefName: String) {
+    private val perf: SharedPreferences = context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
+    private var editor: SharedPreferences.Editor? = null
+
+    fun <T> getValue(key: String, value: T): T {
+        return when (value) {
+            is String -> perf.getString(key, value) as T
+            is Boolean -> perf.getBoolean(key, value) as T
+            is Int -> perf.getInt(key, value) as T
+            else -> "" as T
+        }
+    }
+
+    fun <T> putValue(key: String, value: T): T {
+        editor = perf.edit()
+        when (value) {
+            is String -> editor?.putString(key, value)
+            is Boolean -> editor?.putBoolean(key, value)
+            is Int -> editor?.putInt(key, value)
+        }
+        editor?.apply()
+        editor = null
+        return getValue(key, value)
+    }
+}
 
 fun Context.showToast(message: String, isLong: Boolean = false) {
     Toast.makeText(this, message, if (isLong) Toast.LENGTH_SHORT else Toast.LENGTH_SHORT).show()
@@ -298,4 +321,13 @@ fun Context.findActivity(): Activity? {
     if (this is Activity) return this
     return if (this is ContextWrapper) findActivity()
     else null
+}
+
+fun String.hash64(): ULong {
+    val data = this.toByteArray(charset("UTF-8"))
+    return XXHashFactory
+        .fastestInstance()
+        .hash64()
+        .hash(data, 0, data.size, 0L)
+        .toULong()
 }

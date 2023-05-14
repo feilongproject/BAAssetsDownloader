@@ -3,9 +3,7 @@ package com.feilongproject.baassetsdownloader
 import com.google.gson.annotations.SerializedName
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.POST
-import retrofit2.http.Streaming
+import retrofit2.http.*
 
 
 interface ServerAPI {
@@ -24,13 +22,17 @@ interface ServerAPI {
     @POST("/downloadObb")
     fun downloadObb(@Body body: ServerTypes.ServerTypeRequest): Call<ResponseBody>
 
+    // https://assets.schale.top/downloadApi
+    @POST("/downloadApi")
+    fun downloadApi(@Body body: ServerTypes.ServerTypeRequest): Call<ServerTypes.DownloadApiResponse>
+
 }
 
-//interface JpServerApi {
-//    //https://prod-noticeindex.bluearchiveyostar.com/prod/index.json
-//    @GET("/prod/index.json")
-//    fun versionCheck(): Call<JpServerTypes.VersionCheck>
-//}
+interface DownloadService {
+    @Streaming
+    @GET
+    fun download(@Url url: String): Call<ResponseBody>
+}
 
 class ServerTypes {
 
@@ -49,130 +51,51 @@ class ServerTypes {
         @SerializedName("apkMD5")
         val apkMD5: String,
     )
-}
 
-
-/*
-class JpServerTypes {
-    data class VersionCheck(
-        @SerializedName("Banners")
-        val banners: List<Banner>,
-        @SerializedName("ContentLock")
-        val contentLock: List<Any>,
-        @SerializedName("Events")
-        val events: List<Event>,
-        @SerializedName("GachaPeriodDisplay")
-        val gachaPeriodDisplay: List<GachaPeriodDisplay>,
-        @SerializedName("GachaProbabilityDisplay")
-        val gachaProbabilityDisplay: List<GachaProbabilityDisplay>,
-        @SerializedName("LatestClientVersion")
-        val latestClientVersion: String,
-        @SerializedName("Maintenance")
-        val maintenance: Maintenance,
-        @SerializedName("Notices")
-        val notices: List<Notice>,
-        @SerializedName("NotificationBeforeMaintenance")
-        val notificationBeforeMaintenance: NotificationBeforeMaintenance,
-        @SerializedName("ServerStatus")
-        val serverStatus: Int,
-        @SerializedName("Survey")
-        val survey: Survey
+    data class DownloadApiResponse(
+        @SerializedName("baseUrl")
+        val baseUrl: String,
+        @SerializedName("bundleInfo")
+        val bundleInfo: Map<String, BundleInfo>,
+        @SerializedName("name")
+        val name: String,
+        @SerializedName("version")
+        val version: String,
+        @SerializedName("total")
+        val total: Int,
     ) {
-        data class Banner(
-            @SerializedName("BannerId")
-            val bannerId: Int,
-            @SerializedName("BannerType")
-            val bannerType: Int?,
-            @SerializedName("EndDate")
-            val endDate: String,
-            @SerializedName("FileName")
-            val fileName: List<String>,
-            @SerializedName("LinkedLobbyBannerId")
-            val linkedLobbyBannerId: Int,
-            @SerializedName("StartDate")
-            val startDate: String,
-            @SerializedName("Url")
-            val url: String
-        )
-
-        data class Event(
-            @SerializedName("EndDate")
-            val endDate: String,
-            @SerializedName("NoticeId")
-            val noticeId: Int,
-            @SerializedName("StartDate")
-            val startDate: String,
-            @SerializedName("Title")
-            val title: String,
-            @SerializedName("Url")
-            val url: String
-        )
-
-        data class GachaPeriodDisplay(
-            @SerializedName("GachaPeriodDisplayId")
-            val gachaPeriodDisplayId: Int,
-            @SerializedName("Text")
-            val text: String
-        )
-
-        data class GachaProbabilityDisplay(
-            @SerializedName("GachaProbabilityDisplayId")
-            val gachaProbabilityDisplayId: Int,
-            @SerializedName("LinkedLobbyBannerId")
-            val linkedLobbyBannerId: Int,
-            @SerializedName("Url")
-            val url: String
-        )
-
-        data class Maintenance(
-            @SerializedName("EndDate")
-            val endDate: String,
-            @SerializedName("StartDate")
-            val startDate: String,
-            @SerializedName("Text")
-            val text: String
-        )
-
-        data class Notice(
-            @SerializedName("EndDate")
-            val endDate: String,
-            @SerializedName("NoticeId")
-            val noticeId: Int,
-            @SerializedName("StartDate")
-            val startDate: String,
-            @SerializedName("Title")
-            val title: String,
-            @SerializedName("Url")
-            val url: String
-        )
-
-        data class NotificationBeforeMaintenance(
-            @SerializedName("EndDate")
-            val endDate: String,
-            @SerializedName("PopupType")
-            val popupType: Int,
-            @SerializedName("StartDate")
-            val startDate: String,
-            @SerializedName("Text")
-            val text: String
-        )
-
-        data class Survey(
-            @SerializedName("EndDate")
-            val endDate: String,
-            @SerializedName("FileName")
-            val fileName: String,
-            @SerializedName("PopupType")
-            val popupType: Int,
-            @SerializedName("StartDate")
-            val startDate: String,
-            @SerializedName("SurveyId")
-            val surveyId: Int,
-            @SerializedName("Text")
-            val text: String,
-            @SerializedName("Url")
-            val url: String
-        )
+        data class BundleInfo(
+            @SerializedName("files")
+            val files: Map<String, File>,
+            @SerializedName("hashType")
+            val hashType: String,
+            @SerializedName("urlPath")
+            val urlPath: String,
+            @SerializedName("saveNameRule")
+            val saveNameRule: String,
+            @SerializedName("saveNameRuleDat")
+            val saveNameRuleDat: String?,
+            @SerializedName("total")
+            val partTotal: Int,
+        ) {
+            data class File(
+                @SerializedName("h")
+                val hash: String,
+                @SerializedName("s")
+                val size: Long,
+                @SerializedName("n")
+                val fileName: String?,
+                )
+        }
     }
 }
-*/
+
+
+data class AssetFile(
+    val urlPath: String,
+    val savePathName: String,
+    val datPathName: String?,
+    val hashType: String,
+    val hash: String,
+    val size: Long,
+)

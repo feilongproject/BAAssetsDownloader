@@ -17,6 +17,7 @@ import com.feilongproject.baassetsdownloader.*
 import com.feilongproject.baassetsdownloader.pages.packageNameMap
 import java.io.*
 import java.security.MessageDigest
+import java.util.zip.CRC32
 
 
 const val intentFlag =
@@ -59,8 +60,16 @@ class FileUtil(private val filePath: String, private val context: Context) {
             }
             return stringBuilder.toString()
         }
+    val crc32: ULong
+        get() {
+            val crc32 = CRC32()
+            crc32.update(file.readBytes())
+            return crc32.value.toULong()
+        }
     val canWrite: Boolean
         get() = if (!highVersionFix) file.canWrite() else docFile?.canWrite() ?: false
+    val parent: FileUtil?
+        get() = file.parent?.let { FileUtil(it, context) }
     private val isExternalStorage: Boolean
         get() = (fullFilePath.startsWith(externalStorageDir))
 
@@ -71,8 +80,8 @@ class FileUtil(private val filePath: String, private val context: Context) {
         if (highVersionFix) {
             docPath = mkDir()
             docFile = docPath?.findFile(name)
-            Log.d("FLP_DEBUG", "docPath: ${docPath?.uri} R/W: ${docPath?.canRead()}/${docPath?.canWrite()}")
-            Log.d("FLP_DEBUG", "docFile: ${docFile?.uri} R/W: ${docFile?.canRead()}/${docFile?.canWrite()}")
+//            Log.d("FLP_DEBUG", "docPath: ${docPath?.uri} R/W: ${docPath?.canRead()}/${docPath?.canWrite()}")
+//            Log.d("FLP_DEBUG", "docFile: ${docFile?.uri} R/W: ${docFile?.canRead()}/${docFile?.canWrite()}")
         }
     }
 
@@ -126,7 +135,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
 
             Log.d("FLP_DEBUG", "> 在授权路径 uriPath: $uriPath 中已找到: androidPath: $androidPath")
             var findFileRoot: DocumentFile = DocumentFile.fromTreeUri(context, uriPermission.uri) ?: return null
-            var pathSplit = androidPath.replace(uriPath, "").split("/").toMutableList()
+            val pathSplit = androidPath.replace(uriPath, "").split("/").toMutableList()
             pathSplit.removeFirst()
             Log.d("FLP_DEBUG", "pathSplit: $pathSplit")
 
@@ -151,53 +160,64 @@ class FileUtil(private val filePath: String, private val context: Context) {
         return pathInfo.findFile(name)?.uri ?: pathInfo.createFile("application/octet-stream", name)?.uri
     }
 
+    fun makeEmptyFile(): Boolean {
+        val fd = if (highVersionFix) {
+            val findUri =
+                docPath?.let { findFileUri(it) } ?: return false
+            context.contentResolver.openFileDescriptor(findUri, "w")
+                ?: return false
+        } else null
+        val outputStream: FileOutputStream = if (highVersionFix && fd != null) {
+            FileOutputStream(fd.fileDescriptor)
+        } else {
+            file.parentFile?.mkdirs()
+            FileOutputStream(file)
+        }
+        outputStream.write("".toByteArray())
+        fd?.close()
+        outputStream.close()
+        return true
+    }
+
     fun saveToFile(inputStream: InputStream, downloadListener: DownloadListener) {
-        Log.d("FLP_DEBUG", "saveToFile: $fullFilePath highVersionFix: $highVersionFix")
-        var len: Int
-        var currentLength: Long = 0
-        downloadListener.onStart()
+//        Log.d("FLP_DEBUG", "saveToFile: $fullFilePath highVersionFix: $highVersionFix")
         try {
+            var len: Int
+            var currentLength: Long = 0
+            downloadListener.onStart()
             val fd = if (highVersionFix) {
                 val findUri =
                     docPath?.let { findFileUri(it) } ?: return downloadListener.onFailure("no Permission $fullFilePath")
                 context.contentResolver.openFileDescriptor(findUri, "w")
                     ?: return downloadListener.onFailure("not openFileDescriptor $fullFilePath")
             } else null
-            val outputStream: FileOutputStream = if (highVersionFix && fd != null) {
-                FileOutputStream(fd.fileDescriptor)
+            val outputStream: OutputStream = if (highVersionFix && fd != null) {
+                BufferedOutputStream(FileOutputStream(fd.fileDescriptor))
             } else {
-                Log.d("FLP_DEBUG", "file: $file\nfile.parentFile:${file.parentFile}")
+//                Log.d("FLP_DEBUG", "file: $file\nfile.parentFile:${file.parentFile}")
                 file.parentFile?.mkdirs()
-                FileOutputStream(file)
+                BufferedOutputStream(FileOutputStream(file))
             }
             val buff = ByteArray(1024 * 1024) //设置buff块大小
 
-            while ((inputStream.read(buff).also { len = it }) != -1) {
-                Log.d("FLP_Download", "当前进度: $currentLength")
-                outputStream.write(buff, 0, len)
-                currentLength += len
-
-                //计算当前下载百分比，并经由回调传出
-                downloadListener.onProgress(currentLength)
+            inputStream.use { input ->
+                outputStream.use { output ->
+                    while ((input.read(buff).also { len = it }) != -1) {
+//                Log.d("FLP_Download", "当前进度: $currentLength")
+                        output.write(buff, 0, len)
+                        currentLength += len
+                        downloadListener.onProgress(currentLength)
+                    }
+                }
             }
 
             fd?.close()
-            outputStream.close()
             downloadListener.onFinish() //下载完成
         } catch (e: Throwable) {
             e.printStackTrace()
-            Log.e("FLP_DEBUG1", e.toString())
+//            Log.e("FLP_DEBUG1", e.toString())
             downloadListener.onFailure(e.toString())
-        } finally {
-            try {
-                inputStream.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-                Log.e("FLP_DEBUG", e.toString())
-                downloadListener.onFailure(e.toString())
-            }
         }
-
     }
 
     fun checkPermission(requirePermission: Boolean = true): Boolean {
@@ -215,7 +235,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
             }
 
             else -> {
-                context.showToastResId(R.string.noStoragePermission, true)
+                context.showToastResId(R.string.noStoragePermissionObb, true)
                 val intent = Intent()
                 intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                 intent.data = Uri.parse("package:${context.packageName}")
@@ -227,7 +247,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun requestSAFPermission() {
-        Log.d("FLP_DEBUG", "requestSAFPermission")
+        Log.d("FLP_DEBUG", "requestSAFPermission $filePath")
 
         val act = context.findActivity() ?: return
         val rex = Regex("(data|obb)/com.(.*)/").find(filePath)?.value ?: return
@@ -254,11 +274,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
                     act.startActivityForResult(intent, RequestPermissionCode)
                 }
                 .setNeutralButton(context.getString(R.string.openGame)) { _, _ ->
-                    val intent =
-                        packageNameMap["jpServer"]?.let { context.packageManager.getLaunchIntentForPackage(it) }
-                    if (intent != null) {
-                        context.startActivity(intent)
-                    } else {
+                    if (packageNameMap["jpServer"]?.let { openApplication(context, it) } == null) {
                         AlertDialog.Builder(context)
                             .setMessage(context.getString(R.string.notInstallApk))
                             .show()
