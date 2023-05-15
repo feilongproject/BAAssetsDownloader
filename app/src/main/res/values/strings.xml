@@ -94,4 +94,7 @@
     <string name="assetsDownloadInfo">progress: %d/%d thread: %d/%d</string>
     <string name="getAssetsNum">already assets num: %d</string>
     <string name="downloadError">download fail: %s</string>
+    <string name="notNumberWarn">only support number</string>
+    <string name="threadNumber">thread number</string>
+    <string name="checkingUpdate">checking update</string>
 </resources>

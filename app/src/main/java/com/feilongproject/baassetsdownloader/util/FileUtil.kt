@@ -237,6 +237,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
             else -> {
                 context.showToastResId(R.string.noStoragePermissionObb, true)
                 val intent = Intent()
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                 intent.data = Uri.parse("package:${context.packageName}")
                 context.startActivity(intent)

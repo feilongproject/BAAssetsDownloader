@@ -24,6 +24,7 @@
     <string name="notShowAgainEnter">不再显示</string>
     <string name="help">帮助</string>
     <string name="checkUpdate">检查更新</string>
+    <string name="checkingUpdate">检查更新中</string>
     <string name="openGame">打开游戏</string>
     <string name="getError">获取出错</string>
     <string name="getSuccess">获取成功</string>
@@ -34,7 +35,7 @@
     <string name="helloMessage"><![CDATA[
         碧蓝档案下载器(BAAssetsDownloader/BAAD)<br>
         是一款专门用来下载手游《碧蓝档案》资源的app。<br>
-        可下载内容包括：apk安装包/obb数据包，未来将会支持资源包。<br>
+        可下载内容包括：apk安装包/obb数据包，资源包下载正在测试。<br>
         下载器已在<a href="https://github.com/feilongproject/BAAssestDownloader">GitHub</a>开源，
         欢迎到<a href="https://afdian.net/a/feilongproject">爱发电平台</a>进行赞助!
     ]]></string>
@@ -120,6 +121,9 @@
     <string name="selectApiUrl">选择 API</string>
     <string name="customApiUrl">自定义 API</string>
     <string name="typeApiUrl">输入 API 链接</string>
+
+    <string name="notNumberWarn">仅允许输入数字</string>
+    <string name="threadNumber">下载线程数量</string>
 
 <!--    <string name="downloadNotificationTitle">下载进度</string>-->
     <string name="downloadNotificationContent">下载进度: %d(约)/%d 失败次数: %d</string>
