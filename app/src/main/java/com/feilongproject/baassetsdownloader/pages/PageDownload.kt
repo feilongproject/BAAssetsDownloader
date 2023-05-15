@@ -171,10 +171,13 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                             else Text(stringResource(R.string.apkSameServerVersion))
 
                             if (apkAssetInfo?.serverType == "jpServer") {
-                                if (apkAssetInfo?.needUpdateObb == true) {
-                                    if (apkAssetInfo?.localObbFile?.parent?.canWrite == true) Text(stringResource(R.string.obbNotSameServerVersion))
-                                    else Text(stringResource(R.string.obbNotSameServerVersionWithoutPermission))
-                                } else Text(stringResource(R.string.obbSameServerVersion))
+                                if (apkAssetInfo?.localObbFile?.parent?.canWrite != true) {
+                                    Text(stringResource(R.string.obbNotSameServerVersionWithoutPermission))
+                                }  else if (apkAssetInfo?.needUpdateObb == true) {
+                                    Text(stringResource(R.string.obbNotSameServerVersion))
+                                } else {
+                                    Text(stringResource(R.string.obbSameServerVersion))
+                                }
                                 //Text("${apkAssetInfo?.localObbFile?.length} == ${apkAssetInfo?.serverObbLength}")
                             }
                         }
@@ -274,7 +277,7 @@ fun MultipleFileDownload(context: Context, assetsBody: ServerTypes.DownloadApiRe
                             downloadProgressT[fileName] = Triple(0f, null, null)
                             downloadProgress = downloadProgressT.toMap()
                             if (Looper.myLooper() == null) Looper.prepare()
-                            Log.d("FLP_TEST", "chunk: $fileName")
+                            Log.d("FLP_execute", "chunk: $fileName")
 
                             var b = false
                             for (ii in 1..maxRetry) {
@@ -304,7 +307,7 @@ fun MultipleFileDownload(context: Context, assetsBody: ServerTypes.DownloadApiRe
                             synchronized(this) {
                                 getActiveThreads()
                                 Log.d(
-                                    "FLP_TEST",
+                                    "FLP_synchronized",
                                     "bundleInfo.partTotal: ${bundleInfo.partTotal} downloadedFiles: $downloadStatus"
                                 )
 
@@ -441,7 +444,7 @@ fun downloadFile(
                         }
 
                         override fun onFailure(err: String) {
-                            Log.e("FLP_DEBUG", "onFailure $err")
+                            Log.e("FLP_DEBUG", "onFailure\n$err")
                             progress(-1f, "err", err)
                         }
                     }

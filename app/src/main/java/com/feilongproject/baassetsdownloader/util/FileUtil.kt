@@ -90,64 +90,64 @@ class FileUtil(private val filePath: String, private val context: Context) {
         else file.delete()
     }
 
-    fun listDir(path: String?) {
-        val sp = path?.split("/")
-
-        for (uri in context.contentResolver.persistedUriPermissions) {
-
-            Log.d("FLP_DEBUG_Per", "uri.uri.path: ${uri.uri.path} $sp")
-            Log.d("FLP_DEBUG_Per", "isRead: ${uri.isReadPermission} isWrite: ${uri.isWritePermission}")
-
-            val doc = DocumentFile.fromTreeUri(context, uri.uri)
-
-            with(doc) {
-                if (this == null) return
-                Log.d("FLP_DEBUG_Dir", "${uri.uri.path}/$name isDirectory: $isDirectory")
-
-                if (isDirectory) {
-                    for (d in listFiles()) {
-                        Log.d("FLP_DEBUG_Dir", "${uri.uri.path}/$name/${d.name}")
-                    }
-                }
-            }
-        }
-    }
+//    fun listDir(path: String?) {
+//        val sp = path?.split("/")
+//
+//        for (uri in context.contentResolver.persistedUriPermissions) {
+//
+//            Log.d("FLP_FileUtil.listDir", "uri.uri.path: ${uri.uri.path} $sp")
+//            Log.d("FLP_FileUtil.listDir", "isRead: ${uri.isReadPermission} isWrite: ${uri.isWritePermission}")
+//
+//            val doc = DocumentFile.fromTreeUri(context, uri.uri)
+//
+//            with(doc) {
+//                if (this == null) return
+//                Log.d("FLP_FileUtil", "${uri.uri.path}/$name isDirectory: $isDirectory")
+//
+//                if (isDirectory) {
+//                    for (d in listFiles()) {
+//                        Log.d("FLP_FileUtil.listDir", "${uri.uri.path}/$name/${d.name}")
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private fun mkDir(): DocumentFile? {
         //Throwable().printStackTrace()
         // /storage/emulated/0/Android/obb/com.YostarJP.BlueArchive/-> Android/obb/com.YostarJP.BlueArchive/
         val androidPath = path.replace("/storage/emulated/0/", "")
 
-        Log.d("FLP_DEBUG", "")
-        Log.d("FLP_DEBUG", "androidPath: $androidPath")
+        Log.d("FLP_FileUtil.mkdir", "")
+        Log.d("FLP_FileUtil.mkdir", "androidPath: $androidPath")
         for (uriPermission in context.contentResolver.persistedUriPermissions) {
             Log.d(
-                "FLP_DEBUG",
+                "FLP_FileUtil.mkdir",
                 "授权uri路径: ${uriPermission.uri} 权限: R/W: ${uriPermission.isReadPermission}/${uriPermission.isWritePermission}"
             )
             // /tree/primary:Android/obb/com.YostarJP.BlueArchive -> Android/obb/com.YostarJP.BlueArchive
             val uriPath = uriPermission.uri.path?.replace("/tree/primary:", "") ?: continue
 
             if (!androidPath.startsWith(uriPath)) {
-                Log.d("FLP_DEBUG", "未在授权路径 ${uriPermission.uri.path} 中找到: $androidPath")
+                Log.d("FLP_FileUtil.mkdir", "未在授权路径 ${uriPermission.uri.path} 中找到: $androidPath")
                 continue
             }
 
-            Log.d("FLP_DEBUG", "> 在授权路径 uriPath: $uriPath 中已找到: androidPath: $androidPath")
+            Log.d("FLP_FileUtil.mkdir", "> 在授权路径 uriPath: $uriPath 中已找到: androidPath: $androidPath")
             var findFileRoot: DocumentFile = DocumentFile.fromTreeUri(context, uriPermission.uri) ?: return null
             val pathSplit = androidPath.replace(uriPath, "").split("/").toMutableList()
             pathSplit.removeFirst()
-            Log.d("FLP_DEBUG", "pathSplit: $pathSplit")
+            Log.d("FLP_FileUtil.mkdir", "pathSplit: $pathSplit")
 
             for (path in pathSplit) {
                 val f = findFileRoot.findFile(path)
                 //Log.d("FLP_DEBUG", "在 ${findFileRoot.uri.path} 查找 $path 结果: ${f?.uri?.path}")
                 if (f != null) {
-                    Log.d("FLP_DEBUG", "> 找到文件夹 ${f.uri}")
+                    Log.d("FLP_FileUtil.mkdir", "> 找到文件夹 ${f.uri}")
                     findFileRoot = f
                 } else {
                     findFileRoot = findFileRoot.createDirectory(path)!!
-                    Log.d("FLP_DEBUG", "> 创建文件夹 ${findFileRoot.uri}")
+                    Log.d("FLP_FileUtil.mkdir", "> 创建文件夹 ${findFileRoot.uri}")
                 }
             }
             return findFileRoot
@@ -156,7 +156,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
     }
 
     private fun findFileUri(pathInfo: DocumentFile): Uri? {
-        Log.d("FLP_DEBUG", "pathInfo name: $pathInfo ")
+        Log.d("FLP_FileUtil.findFileUri", "pathInfo name: $pathInfo ")
         return pathInfo.findFile(name)?.uri ?: pathInfo.createFile("application/octet-stream", name)?.uri
     }
 
@@ -182,6 +182,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
     fun saveToFile(inputStream: InputStream, downloadListener: DownloadListener) {
 //        Log.d("FLP_DEBUG", "saveToFile: $fullFilePath highVersionFix: $highVersionFix")
         try {
+//            if (!file.canWrite()) return downloadListener.onFailure("no Permission $fullFilePath")
             var len: Int
             var currentLength: Long = 0
             downloadListener.onStart()
@@ -194,7 +195,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
             val outputStream: OutputStream = if (highVersionFix && fd != null) {
                 BufferedOutputStream(FileOutputStream(fd.fileDescriptor))
             } else {
-//                Log.d("FLP_DEBUG", "file: $file\nfile.parentFile:${file.parentFile}")
+//                Log.d("FLP_DEBUG", "file: $file file.parentFile:${file.parentFile}")
                 file.parentFile?.mkdirs()
                 BufferedOutputStream(FileOutputStream(file))
             }
@@ -248,7 +249,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun requestSAFPermission() {
-        Log.d("FLP_DEBUG", "requestSAFPermission $filePath")
+        Log.d("FLP_FileUtil.requestSAFPermission", "requestSAFPermission $filePath")
 
         val act = context.findActivity() ?: return
         val rex = Regex("(data|obb)/com.(.*)/").find(filePath)?.value ?: return

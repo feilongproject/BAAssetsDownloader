@@ -218,7 +218,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
         object : Callback<ResponseBody> {
             @SuppressLint("SuspiciousIndentation")
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                Log.d("FLP_DEBUG", "start $serverType onResponse")
+                Log.d("FLP_downloadUtil.onResponse", "start $serverType onResponse")
                 var totalLength: Long? = null
                 var sameForServer = false
                 var progressNotice = ""
@@ -265,36 +265,39 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
 
                 val mThread = object : Thread() {
                     override fun run() {
-                        saveFile.saveToFile(
-                            inputStream,
-                            object : DownloadListener {
-                                override fun onStart() {
-                                    Log.d("FLP_DEBUG", "onStart")
-                                }
+                        inputStream.use { inputStream ->
+                            saveFile.saveToFile(
+                                inputStream,
+                                object : DownloadListener {
+                                    override fun onStart() {
+                                        Log.d("FLP_DEBUG", "onStart")
+                                    }
 
-                                override fun onProgress(currentLength: Long) {
-                                    val f = currentLength.toFloat() / totalLength.toFloat()
-                                    val i = progressNotice + "%.2f%%".format(f * 100)
-                                    progress(f, i, null)
-                                    Log.d("FLP_Download", "$i $currentLength/$totalLength")
-                                }
+                                    override fun onProgress(currentLength: Long) {
+                                        val f = currentLength.toFloat() / totalLength.toFloat()
+                                        val i = progressNotice + "%.2f%%".format(f * 100)
+                                        progress(f, i, null)
+                                        Log.d("FLP_Download", "$i $currentLength/$totalLength")
+                                    }
 
-                                override fun onFinish() {
-                                    progress(
-                                        1f,
-                                        context.resString(if (type == "apk") R.string.downloadedApk else R.string.downloadedObb),
-                                        null
-                                    )
-                                    Log.d("FLP_DEBUG", "onFinish: ${saveFile.fullFilePath}")
-                                }
+                                    override fun onFinish() {
+                                        progress(
+                                            1f,
+                                            context.resString(if (type == "apk") R.string.downloadedApk else R.string.downloadedObb),
+                                            null
+                                        )
+                                        Log.d("FLP_DEBUG", "onFinish: ${saveFile.fullFilePath}")
+                                    }
 
-                                override fun onFailure(err: String) {
-                                    Log.e("FLP_DEBUG", "onFailure $err")
+                                    override fun onFailure(err: String) {
+                                        Log.e("FLP_DEBUG", "onFailure\n$err")
 //                                    progress(-1f, err)
-                                    progress(-1f, "on failure", null)
+                                        progress(-1f, "on failure\n$err", null)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
+
 
                         if (type == "apk") {
                             installApk(cacheApkFile, progress)
