@@ -7,8 +7,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,25 +18,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.feilongproject.baassetsdownloader.*
 import com.feilongproject.baassetsdownloader.R
-import com.feilongproject.baassetsdownloader.maxWidth
 import com.feilongproject.baassetsdownloader.util.retrofitBuild
 import com.microsoft.appcenter.distribute.Distribute
 
 
 @Composable
 fun PageSettings(modifier: Modifier, padding: PaddingValues) {
+    val context = LocalContext.current
 
     Surface(
         color = MaterialTheme.colorScheme.primary,
-        modifier = maxWidth.padding(paddingValues = padding).padding(horizontal = 8.dp, vertical = 4.dp)
+        modifier = modifier.padding(paddingValues = padding).padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Column(modifier = maxWidth.padding(10.dp)) {
 //            Text("123456")
-            SettingCustomURL()
+            SettingCustomURL(context)
+            Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
+
+            SettingCustomDownloadThread(context)
             Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
 
             Row(
@@ -43,19 +50,21 @@ fun PageSettings(modifier: Modifier, padding: PaddingValues) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(stringResource(R.string.checkUpdate), modifier = Modifier.padding(end = 5.dp).clickable {
+                    context.showToastResId(R.string.checkingUpdate)
                     Log.d("AppCenter", "开始版本检查")
                     Distribute.checkForUpdate()
                 })
             }
+            Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
+
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingCustomURL() {
+fun SettingCustomURL(context: Context) {
     val options = listOf("default", "custom")
-    val context = LocalContext.current
     var showOptions by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf(customApiUrl(context, "getConfigType", "")) }
     Log.d("FLP_DEBUG", "selectedOption: $selectedOption")
@@ -125,6 +134,56 @@ fun SettingCustomURL() {
             }
         }
 
+
+    }
+}
+
+@Composable
+fun SettingCustomDownloadThread(context: Context) {
+
+    val pref = Pref(context, "config")
+    var textValue by remember { mutableStateOf(TextFieldValue(pref.getValue("downloadThreadNum", 8).toString())) }
+    var notNumber by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().height(50.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(stringResource(R.string.threadNumber), modifier = Modifier.padding(end = 5.dp))
+        OutlinedTextField(
+            isError = notNumber,
+            value = textValue,
+            onValueChange = { v ->
+                Log.d("FLP_DEBUG", v.toString())
+                val setNum = v.text.toIntOrNull()
+                if (setNum == null && v.text != "") context.showToastResId(R.string.notNumberWarn)
+                else {
+                    pref.putValue("downloadThreadNum", setNum.let {
+                        notNumber = setNum == null
+                        it ?: 8
+                    })
+                    textValue = v
+                }
+//                Log.d("FLP_DEBUG", "v: $v downloadThreadNum: ${pref.getValue("downloadThreadNum", 8)}")
+            },
+            leadingIcon = { if (notNumber) Icon(Icons.Default.Error, null) },
+//            label = { Text(stringResource(R.string.typeApiUrl)) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                unfocusedLabelColor = MaterialTheme.colorScheme.primary,
+                focusedLabelColor = MaterialTheme.colorScheme.primaryContainer,
+                errorContainerColor = MaterialTheme.colorScheme.errorContainer,
+                errorBorderColor = MaterialTheme.colorScheme.errorContainer,
+//                    focusedBorderColor = MaterialTheme.colorScheme.outline,
+            ),
+            modifier = Modifier.fillMaxWidth(),//.padding(0.dp),
+            shape = RoundedCornerShape(0.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
 
     }
 }
