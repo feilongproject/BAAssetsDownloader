@@ -30,6 +30,12 @@ class FileUtil(private val filePath: String, private val context: Context) {
         "Android" -> "/storage/emulated/0/$filePath"
         else -> filePath
     }
+    private val baseFilePath: String
+        get() {
+            return if (fullFilePath.startsWith("/storage/emulated/0/Android/")) {
+                fullFilePath.split("/").take(7).joinToString("/")
+            } else fullFilePath
+        }
     private var docFile: DocumentFile? = null
     private var docPath: DocumentFile? = null
     val length: Long
@@ -63,7 +69,17 @@ class FileUtil(private val filePath: String, private val context: Context) {
     val crc32: ULong
         get() {
             val crc32 = CRC32()
-            crc32.update(file.readBytes())
+            if (highVersionFix) {
+                val findUri = docPath?.let { findFileUri(it) } ?: return 0u
+                context.contentResolver.openFileDescriptor(findUri, "r")?.use { fd ->
+                    val buffer = ByteArray(1024)
+                    var bytesRead: Int
+                    val inputStream = FileInputStream(fd.fileDescriptor)
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        crc32.update(buffer, 0, bytesRead)
+                    }
+                }
+            } else crc32.update(file.readBytes())
             return crc32.value.toULong()
         }
     val canWrite: Boolean
@@ -77,6 +93,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && isExternalStorage
 
     init {
+        Log.i("FLP_FileUtil.init", "filePath: $filePath")
         if (highVersionFix) {
             docPath = mkDir()
             docFile = docPath?.findFile(name)
@@ -258,9 +275,9 @@ class FileUtil(private val filePath: String, private val context: Context) {
             .parse(uriAndroidPath + ("Android/$rex").replace("/", "%2F"))
             .let { DocumentFile.fromTreeUri(act, it) } ?: return
         if (Looper.myLooper() != Looper.getMainLooper()) Looper.prepare()
-        context.findActivity()!!.runOnUiThread {
+        act.runOnUiThread {
             AlertDialog.Builder(context)
-                .setMessage(File(context.obbDir.parent, "com.YostarJP.BlueArchive").exists().let {
+                .setMessage(File(baseFilePath).exists().let {
                     val noStoragePermission11 = context.getString(R.string.noStoragePermission11)
                     if (it) {
                         noStoragePermission11
