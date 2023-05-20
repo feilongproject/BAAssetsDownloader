@@ -65,6 +65,8 @@ class ServerTypes {
         val total: Int,
     ) {
         data class BundleInfo(
+            @SerializedName("id")
+            val id: String,
             @SerializedName("files")
             val files: Map<String, File>,
             @SerializedName("hashType")
@@ -85,7 +87,7 @@ class ServerTypes {
                 val size: Long,
                 @SerializedName("n")
                 val fileName: String?,
-                )
+            )
         }
     }
 }
@@ -93,6 +95,7 @@ class ServerTypes {
 
 data class AssetFile(
     val urlPath: String,
+    val showName: String,
     val savePathName: String,
     val datPathName: String?,
     val hashType: String,

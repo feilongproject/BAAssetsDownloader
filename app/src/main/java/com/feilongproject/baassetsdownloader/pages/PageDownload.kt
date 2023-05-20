@@ -25,7 +25,6 @@ import com.feilongproject.baassetsdownloader.*
 import com.feilongproject.baassetsdownloader.R
 import com.feilongproject.baassetsdownloader.util.*
 import retrofit2.Retrofit
-import java.util.*
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicReference
 
@@ -37,7 +36,7 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
     var assetLoadStatus: String? by remember { mutableStateOf(null) }
     var downloadProgress by remember { mutableStateOf(0f) }
     var showMultipleDownloadAssets by remember { mutableStateOf(false) }
-    val context = LocalContext.current.applicationContext
+    val context = LocalContext.current
     val apkAssetInfo: ApkAssetInfo? by remember { mutableStateOf(ApkAssetInfo(context, selectServer)) }
     apkAssetInfo!!.versionCheck { p, i, _ ->
         assetLoadProgress = p
@@ -76,7 +75,6 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                     AssistChip(
                         onClick = {
                             apkAssetInfo!!.downloadApk { p, i, _ ->
-                                assetLoadProgress = p
                                 downloadProgress = p
                                 assetLoadStatus = i
                             }
@@ -88,7 +86,6 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                         enabled = selectServer == "jpServer",
                         onClick = {
                             apkAssetInfo!!.downloadObb({ p, i, _ ->
-                                assetLoadProgress = p
                                 downloadProgress = p
                                 assetLoadStatus = i
                             })
@@ -105,7 +102,6 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                         onClick = {
                             showMultipleDownloadAssets = false
                             apkAssetInfo!!.downloadAssets { p, i, e ->
-                                assetLoadProgress = p
                                 downloadProgress = p
                                 assetLoadStatus = i
                                 if (e == "downloadBundle") showMultipleDownloadAssets = true
@@ -173,7 +169,7 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                             if (apkAssetInfo?.serverType == "jpServer") {
                                 if (apkAssetInfo?.localObbFile?.parent?.canWrite != true) {
                                     Text(stringResource(R.string.obbNotSameServerVersionWithoutPermission))
-                                }  else if (apkAssetInfo?.needUpdateObb == true) {
+                                } else if (apkAssetInfo?.needUpdateObb == true) {
                                     Text(stringResource(R.string.obbNotSameServerVersion))
                                 } else {
                                     Text(stringResource(R.string.obbSameServerVersion))
@@ -211,22 +207,20 @@ fun MultipleFileDownload(context: Context, assetsBody: ServerTypes.DownloadApiRe
     var activeThreads by remember { mutableStateOf(0) }
     val threadNum = Pref(context, "config").getValue("downloadThreadNum", 8)
     val maxRetry = Pref(context, "config").getValue("maxRetry", 3)
-    val throttleProgress = ThrottleProgress(200)
+    val throttleProgress = ThrottleProgress(500)
     val executor = Executors.newFixedThreadPool(threadNum)
     val scrollState = rememberScrollState()
     val downloadService = Retrofit.Builder()
         .baseUrl(assetsBody.baseUrl)
         .build()
         .create(DownloadService::class.java)
+    val notificationMap = mutableMapOf<String, DownloadNotification>()
 
-    val downloadProgressT = ConcurrentSkipListMap<String, Triple<Float, String?, String?>>()
+    val downloadProgressT = ConcurrentSkipListMap<String, Triple<Float, String?, String?>>()//下载进度条(需要保证线程安全)
     var downloadProgress by remember { mutableStateOf(downloadProgressT.toMap()) }
 
-//    val progressNoticeT = ConcurrentHashMap<String, Int>()
-//    var progressNotice by remember { mutableStateOf(progressNoticeT.toMap()) }
-
-    val downloadStatusT = AtomicReference(Triple(0, 0, 0))
-    var downloadStatus by remember { mutableStateOf(downloadStatusT.get()) }
+    val totalDownloadStatusT = AtomicReference(Triple(0, 0, 0))//下载状态条(需要保证线程安全)
+    var totalDownloadStatus by remember { mutableStateOf(totalDownloadStatusT.get()) }
 //    val downloadedFilesT = AtomicInteger(0)
 //    var downloadedFiles by remember { mutableStateOf(0) }
 
@@ -252,21 +246,28 @@ fun MultipleFileDownload(context: Context, assetsBody: ServerTypes.DownloadApiRe
         AssistChip(
             enabled = activeThreads == 0,
             onClick = {
-                downloadStatusT.set(Triple(0, 0, 0))
-                downloadStatus = downloadStatusT.get()
+                notificationMap.clear()
+                totalDownloadStatusT.set(Triple(0, 0, 0))
+                totalDownloadStatus = totalDownloadStatusT.get()
 //                downloadedFilesT.set(0)
 //                downloadedFiles = downloadedFilesT.get()
 //                progressNoticeT.clear()
                 assetsBody.bundleInfo.forEach { (path, bundleInfo) ->
-                    Log.d("FLP_DEBUG", "$path.files.size: ${bundleInfo.files.size}")
-                    val notification = DownloadNotification(context, Date().time.toInt())
-                    notification.notifyProgress(bundleInfo.files.size, downloadStatus, null)
+                    Log.d("FLP_MultipleFileDownload.bundleInfo.forEach", "path.partTotal: ${bundleInfo.partTotal}")
+                    val partDownloadStatus = AtomicReference(Triple(0, 0, 0))
+                    notificationMap[path] = DownloadNotification(context, bundleInfo.partTotal, bundleInfo.id)
+                    notificationMap[path]?.notifyProgress(partDownloadStatus.get(), null)
 
                     bundleInfo.files.forEach { (fileName, fileInfo) ->
                         executor.execute {
                             val assetFile = AssetFile(
                                 urlPath = bundleInfo.urlPath + fileName,
-                                savePathName = path + turnNameRule(bundleInfo.saveNameRule, fileName, fileInfo),
+                                showName = fileName,
+                                savePathName = path + turnNameRule(
+                                    bundleInfo.saveNameRule,
+                                    fileInfo.fileName ?: fileName,
+                                    fileInfo
+                                ),
                                 datPathName = bundleInfo.saveNameRuleDat?.let {
                                     path + turnNameRule(it, fileInfo.fileName ?: fileName, fileInfo)
                                 },
@@ -308,10 +309,14 @@ fun MultipleFileDownload(context: Context, assetsBody: ServerTypes.DownloadApiRe
                                 getActiveThreads()
                                 Log.d(
                                     "FLP_synchronized",
-                                    "bundleInfo.partTotal: ${bundleInfo.partTotal} downloadedFiles: $downloadStatus"
+                                    "bundleInfo id: ${bundleInfo.id} partTotal: ${bundleInfo.partTotal},notificationDownloadStatus: $partDownloadStatus downloadStatus: $totalDownloadStatus"
                                 )
 
-                                downloadStatus = downloadStatusT.updateAndGet {
+                                totalDownloadStatus = totalDownloadStatusT.updateAndGet {
+                                    if (b) Triple(it.first + 1, it.second + 1, it.third)
+                                    else Triple(it.first + 1, it.second, it.third + 1)
+                                }
+                                partDownloadStatus.updateAndGet {
                                     if (b) Triple(it.first + 1, it.second + 1, it.third)
                                     else Triple(it.first + 1, it.second, it.third + 1)
                                 }
@@ -324,8 +329,10 @@ fun MultipleFileDownload(context: Context, assetsBody: ServerTypes.DownloadApiRe
                                     Log.e("FLP_TEST", "$downloadProgressT")
                                 }
 
-                                throttleProgress.update(false) {
-                                    notification.notifyProgress(bundleInfo.partTotal, downloadStatus, null)
+                                if (bundleInfo.partTotal == partDownloadStatus.get().first)
+                                    notificationMap[path]?.notifyFinish()
+                                else throttleProgress.update(false) {
+                                    notificationMap[path]?.notifyProgress(partDownloadStatus.get(), null)
                                 }
 
                             }
@@ -340,8 +347,15 @@ fun MultipleFileDownload(context: Context, assetsBody: ServerTypes.DownloadApiRe
         )
         Text(R.string.assetsDownloadInfo.run {
 //            getActiveThreads()
-            if (downloadStatus.first == assetsBody.total) getActiveThreads()
-            stringResource(this, downloadStatus.first, assetsBody.total, downloadStatus.third, activeThreads, threadNum)
+            if (totalDownloadStatus.first == assetsBody.total) getActiveThreads()
+            stringResource(
+                this,
+                totalDownloadStatus.first,
+                assetsBody.total,
+                totalDownloadStatus.third,
+                activeThreads,
+                threadNum
+            )
         })
 
 //        progressNotice.forEach { (type, num) ->
@@ -395,14 +409,12 @@ fun downloadFile(
     assetInfo: Pair<String, AssetFile>,
     progress: (p: Float, e: String, i: String?) -> Unit
 ) {
-
     val (_, assetFile) = assetInfo
-
     val saveFile = FileUtil("$externalStorageDir/Android/data/${assetFile.savePathName}", context)
     val datFile = assetFile.datPathName?.let {
         FileUtil("$externalStorageDir/Android/data/$it", context)
     }
-    if (datFile?.exists == true) return progress(1f, "skip", null)
+    if (datFile?.exists == true && saveFile.exists) return progress(1f, "skip", null)
 
 //    Log.d("FLP_DEBUG", "saveFile.fullFilePath: ${saveFile.fullFilePath} assetName: $assetName assetFile: $assetFile")
     try {
@@ -444,7 +456,7 @@ fun downloadFile(
                         }
 
                         override fun onFailure(err: String) {
-                            Log.e("FLP_DEBUG", "onFailure\n$err")
+                            Log.e("FLP_downloadFile.onFailure", "onFailure\n$err")
                             progress(-1f, "err", err)
                         }
                     }
@@ -456,13 +468,13 @@ fun downloadFile(
             val statusCode = response.code()
             val errorBody = response.errorBody()?.string()
             progress(-1f, "err", "statusCode: $statusCode errorBody: $errorBody")
-            Log.e("FLP_DEBUG_not_isSuccessful", "statusCode: $statusCode errorBody: $errorBody")
+            Log.e("FLP_downloadFile", "not isSuccessful statusCode: $statusCode errorBody: $errorBody")
             context.showToast(statusCode.toString() + errorBody, true)
         }
 
 
     } catch (e: Throwable) {
-        Log.e("FLP_DEBUG_catch", "(e: IOException) $e")
+        Log.e("FLP_downloadFile.catch", "(e: IOException) $e")
         context.showToast(e.toString(), true)
         progress(-1f, "err", e.toString())
     }

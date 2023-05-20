@@ -126,8 +126,8 @@
     <string name="threadNumber">下载线程数量</string>
 
 <!--    <string name="downloadNotificationTitle">下载进度</string>-->
-    <string name="downloadNotificationContent">下载进度: %d(约)/%d 失败次数: %d</string>
+    <string name="downloadNotificationContent">%s下载进度: %d(约)/%d 失败次数: %d</string>
     <string name="downloadNotificationChannelName">显示下载进度</string>
     <string name="downloadNotificationChannelDesc">使用进度条显示当前下载进度</string>
-    <string name="downloadNotificationFinish">下载完毕</string>
+    <string name="downloadNotificationFinish">%s下载完毕</string>
 </resources>

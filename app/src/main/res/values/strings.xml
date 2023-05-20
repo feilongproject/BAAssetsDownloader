@@ -86,10 +86,10 @@
     <string name="getting">getting</string>
     <string name="downloadBundlesStart">assets download start, checking update</string>
     <string name="noStoragePermissionBundles">NO ENGLISH, USE CHINESE NOW!</string>
-    <string name="downloadNotificationContent">download progress %d/%d fail: %d</string>
+    <string name="downloadNotificationContent">%sdownload progress %d/%d fail: %d</string>
     <string name="downloadNotificationChannelName">show download progress</string>
     <string name="downloadNotificationChannelDesc">show download progress</string>
-    <string name="downloadNotificationFinish">download finish</string>
+    <string name="downloadNotificationFinish">%sdownload finish</string>
     <string name="getAssets">get assets info</string>
     <string name="assetsDownloadInfo">progress: %d/%d thread: %d/%d</string>
     <string name="getAssetsNum">already assets num: %d</string>

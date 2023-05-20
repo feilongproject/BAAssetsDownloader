@@ -6,17 +6,19 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.feilongproject.baassetsdownloader.R
+import com.feilongproject.baassetsdownloader.hash64
 import com.feilongproject.baassetsdownloader.showToast
 
 const val NOTIFICATION_GROUP_ID = "downloadProgressNotification"
 
-class DownloadNotification(private val context: Context, private val notificationId: Int) {
+class DownloadNotification(private val context: Context, private val total: Int, private val id: String) {
 
-    private var n = 0
+    private val notificationId = id.hash64().toInt()
     private val notificationManager = NotificationManagerCompat.from(context)
     private val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_GROUP_ID)
         .setSmallIcon(R.drawable.ic_splash_bg)
@@ -43,25 +45,26 @@ class DownloadNotification(private val context: Context, private val notificatio
     }
 
     @Synchronized
-    fun notifyProgress(max: Int, now: Triple<Int, Int, Int>, indeterminate: Boolean?) {
-        if (max == now.first) return notifyFinish(context.getString(R.string.downloadNotificationFinish))
-        if (now.first < n) return
+    fun notifyProgress(info: Triple<Int, Int, Int>, indeterminate: Boolean?) {
+        if (total == info.first) return notifyFinish()
+        if (total < info.first) {
+            Log.d("FLP_notifyProgress", "$total $info"); return
+        }
         if (!checkSelfPermission()) return
-        n = now.first
-        notificationBuilder.setProgress(max, now.first, indeterminate ?: false)
-            .setContentText(context.getString(R.string.downloadNotificationContent, now.first, max, now.third))
+        notificationBuilder.setProgress(total, info.first, indeterminate ?: false)
+            .setContentText(context.getString(R.string.downloadNotificationContent, id, info.first, total, info.third))
             .setOngoing(true)
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
     @Synchronized
-    fun notifyFinish(content: String) {
+    fun notifyFinish() {
         if (!checkSelfPermission()) return
         notificationBuilder.setProgress(0, 0, false)
-            .setContentText(content)
+            .setContentText(context.getString(R.string.downloadNotificationFinish, id))
             .setOngoing(false)
         notificationManager.cancel(notificationId)
-        notificationManager.notify(notificationId + 1, notificationBuilder.build())
+        notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
     private fun checkSelfPermission(): Boolean {

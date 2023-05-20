@@ -150,7 +150,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
     }
 
     fun downloadAssets(progress: (p: Float, i: String?, e: String?) -> Unit) {
-        Log.d("FLP_DEBUG", "start $serverType downloadAssets")
+        Log.i("FLP_downloadAssets", "start $serverType downloadAssets")
         Analytics.trackEvent("downloadAssets $serverType")
         progress(0f, context.resString(R.string.downloadBundlesStart), null)
         when {
@@ -173,28 +173,28 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                                 response.body() ?: return progress(-1f, context.resString(R.string.getError), null)
                             Log.d("FLP_DEBUG", body.toString())
 
-                            var totSize = 0
-                            for ((_, bundleInfo) in body.bundleInfo) {
-//                                assetsList[path] = bundleInfo
-                                totSize += bundleInfo.files.size
-//                                for (file in bundleInfo.files) {
-////                                    Log.d("FLP_TEST", "file.key ${file.key} file.value ${file.value}")
-//                                    assetsList[file.key] = AssetFile(
-//                                        baseUrl = body.baseUrl,
-//                                        urlPath = bundleInfo.urlPath + file.key,
-////                                        saveFile = bundleInfo.key + file.key,
-//                                        savePathName = path + turnNameRule(bundleInfo.saveNameRule, file),
-//                                        datPathName = bundleInfo.saveNameRuleDat?.let { path + turnNameRule(it, file) },
-//                                        hashType = bundleInfo.hashType,
-//                                        hash = file.value.hash,
-//                                        size = file.value.size,
-//                                    )
-//                                }
-                            }
+//                            var totSize = 0
+//                            for ((_, bundleInfo) in body.bundleInfo) {
+////                                assetsList[path] = bundleInfo
+//                                totSize += bundleInfo.files.size
+////                                for (file in bundleInfo.files) {
+//////                                    Log.d("FLP_TEST", "file.key ${file.key} file.value ${file.value}")
+////                                    assetsList[file.key] = AssetFile(
+////                                        baseUrl = body.baseUrl,
+////                                        urlPath = bundleInfo.urlPath + file.key,
+//////                                        saveFile = bundleInfo.key + file.key,
+////                                        savePathName = path + turnNameRule(bundleInfo.saveNameRule, file),
+////                                        datPathName = bundleInfo.saveNameRuleDat?.let { path + turnNameRule(it, file) },
+////                                        hashType = bundleInfo.hashType,
+////                                        hash = file.value.hash,
+////                                        size = file.value.size,
+////                                    )
+////                                }
+//                            }
                             assetsBody = body
                             progress(
                                 1f,
-                                context.getString(R.string.getAssetsNum, totSize),
+                                context.getString(R.string.getAssetsNum, body.total),
                                 "downloadBundle"
                             )
                         }
