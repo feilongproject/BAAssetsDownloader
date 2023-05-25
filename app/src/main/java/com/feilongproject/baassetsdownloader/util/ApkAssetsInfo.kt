@@ -114,7 +114,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
             if (cacheApkFile.md5 == serverApkMD5) return installApk(cacheApkFile, progress)
         }//当存在并且文件md5长度相等时, 安装应用
 
-        progress(-1f, context.resString(R.string.downloadApkStart), null)
+        progress(0f, context.resString(R.string.downloadApkStart), "btn.disable.apk")
         customAPI
             .downloadApk(ServerTypes.ServerTypeRequest(serverType))
             .enqueue(downloadUtil(cacheApkFile, "apk", progress))
@@ -123,7 +123,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
     fun downloadObb(progress: (p: Float, i: String?, e: String?) -> Unit, installApkPath: FileUtil? = null) {
         Analytics.trackEvent("downloadObb $serverType")
         Log.d("FLP_DEBUG", "start $serverType downloadObb installApkPath: $installApkPath")
-        progress(-1f, context.resString(R.string.downloadObbStart), null)
+        progress(0f, context.resString(R.string.downloadObbStart), "btn.disable.obb")
         _localObbFile = FileUtil(localObbFilePath, context)
         when {
             serverType != "jpServer" -> {
@@ -133,7 +133,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                 return progress(-1f, "localObbFile not set", null)
             }      //未设置localObbFile
             (localObbFile!!.exists && localObbFile?.length == serverObbLength) -> {
-                return progress(1f, context.resString(R.string.downloadedObb), null)
+                return progress(1f, context.resString(R.string.downloadedObb), "btn.enable.obb")
             }  //本地存在并且长度相等时返回
             localObbFile?.checkPermission() != true -> {
                 return if (localObbFile?.highVersionFix == true)
@@ -250,17 +250,11 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                     return progress(-1f, "$type inputStream:$inputStream or totalLength:$totalLength not set", null)
 
                 when (type) {
-                    "apk" -> if (!needUpdateApk) return progress(
-                        1f,
-                        context.getString(R.string.downloadApkNoNeed),
-                        null
-                    )
+                    "apk" -> if (!needUpdateApk)
+                        return progress(1f, context.getString(R.string.downloadApkNoNeed), "btn.enable.$type")
 
-                    "obb" -> if (!needUpdateObb) return progress(
-                        1f,
-                        context.getString(R.string.downloadObbNoNeed),
-                        null
-                    )
+                    "obb" -> if (!needUpdateObb)
+                        return progress(1f, context.getString(R.string.downloadObbNoNeed), "btn.enable.$type")
                 }
 
                 val mThread = object : Thread() {
@@ -284,7 +278,7 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                                         progress(
                                             1f,
                                             context.resString(if (type == "apk") R.string.downloadedApk else R.string.downloadedObb),
-                                            null
+                                            "btn.enable.$type"
                                         )
                                         Log.d("FLP_DEBUG", "onFinish: ${saveFile.fullFilePath}")
                                     }
@@ -292,27 +286,28 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                                     override fun onFailure(err: String) {
                                         Log.e("FLP_DEBUG", "onFailure\n$err")
 //                                    progress(-1f, err)
-                                        progress(-1f, "on failure\n$err", null)
+                                        progress(-1f, "on failure\n$err", "btn.enable.$type")
                                     }
                                 }
                             )
                         }
 
-
                         if (type == "apk") {
-                            installApk(cacheApkFile, progress)
-                            if (serverType == "jpServer") downloadObb(progress, saveFile)
+                            if (saveFile.length == serverApkLength) {
+                                installApk(cacheApkFile, progress)
+                                if (serverType == "jpServer") downloadObb(progress, saveFile)
+                            }
                         }
                     }
                 }
                 mThread.start()
                 Log.d("FLP_DEBUG", "mThread already start")
-                context.showToast("mThread already start")
+                context.showToastResId(R.string.downloadStart)
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.e("FLP_DEBUG_Callback<ResponseBody>.onFailure", t.toString())
-                progress(-1f, context.resString(R.string.getError) + "\n" + t.toString(), null)
+                progress(-1f, context.resString(R.string.getError) + "\n" + t.toString(), "btn.enable.$type")
                 context.showToast(t.toString(), true)
             }
         }

@@ -243,7 +243,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
                 //Log.d("FLP_DEBUG","isExternalStorage: $isExternalStorage fullFilePath: $fullFilePath")
                 if (!isExternalStorage) return true
-                if (docPath?.canRead() == true && docPath?.canWrite()!!) return true
+                if (docPath?.canRead() == true && docPath?.canWrite() == true) return true
                 if (requirePermission) requestSAFPermission()
                 false
             }

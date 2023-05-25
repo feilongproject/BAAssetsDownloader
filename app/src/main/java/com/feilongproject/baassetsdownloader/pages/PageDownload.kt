@@ -43,6 +43,18 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
         downloadProgress = p
         assetLoadStatus = i
     }
+    var enableStatus by remember { mutableStateOf(Triple(true, true, true)) }
+    fun turnBtnStatus(e: String) {
+        val status = e.split(".")
+        Log.i("FLP_turnBtnStatus", status.toString())
+        val btnStatus = if (status[0] == "disable") false else if (status[0] == "enable") true else return
+        enableStatus = enableStatus.let {
+            if (status[1] == "apk") Triple(btnStatus, it.second, it.third)
+            else if (status[1] == "obb") Triple(it.first, btnStatus, it.third)
+            else if (status[1] == "assets") Triple(it.first, it.second, btnStatus)
+            else it
+        }
+    }
 
     Log.d("FLP_DEBUG", "@Composable:PageDownload $selectServer")
 
@@ -74,31 +86,38 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                 ) {
                     AssistChip(
                         onClick = {
-                            apkAssetInfo!!.downloadApk { p, i, _ ->
+                            apkAssetInfo!!.downloadApk { p, i, e ->
                                 downloadProgress = p
                                 assetLoadStatus = i
+                                if (e?.startsWith("btn.") == true) turnBtnStatus(e.substring(4))
                             }
                         },
+                        enabled = enableStatus.first,
                         label = { Text(stringResource(R.string.downloadAndInstallApk)) },
-                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
                     )//安装包
                     AssistChip(
-                        enabled = selectServer == "jpServer",
+                        enabled = (selectServer == "jpServer") && enableStatus.second,
                         onClick = {
-                            apkAssetInfo!!.downloadObb({ p, i, _ ->
+                            apkAssetInfo!!.downloadObb({ p, i, e ->
                                 downloadProgress = p
                                 assetLoadStatus = i
+                                if (e?.startsWith("btn.") == true) turnBtnStatus(e.substring(4))
                             })
                         },
                         label = { Text(stringResource(R.string.installObb)) },
                         colors = AssistChipDefaults.assistChipColors(
                             containerColor = MaterialTheme.colorScheme.onPrimary,
                             disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     )//数据包
                     AssistChip(
-                        enabled = selectServer == "jpServer",
+                        enabled = (selectServer == "jpServer") && enableStatus.third,
                         onClick = {
                             showMultipleDownloadAssets = false
                             apkAssetInfo!!.downloadAssets { p, i, e ->
@@ -167,7 +186,7 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
                             else Text(stringResource(R.string.apkSameServerVersion))
 
                             if (apkAssetInfo?.serverType == "jpServer") {
-                                if (apkAssetInfo?.localObbFile?.parent?.canWrite != true) {
+                                if (apkAssetInfo?.localObbFile?.canWrite == false) {
                                     Text(stringResource(R.string.obbNotSameServerVersionWithoutPermission))
                                 } else if (apkAssetInfo?.needUpdateObb == true) {
                                     Text(stringResource(R.string.obbNotSameServerVersion))
