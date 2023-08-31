@@ -97,4 +97,19 @@
     <string name="notNumberWarn">only support number</string>
     <string name="threadNumber">thread number</string>
     <string name="checkingUpdate">checking update</string>
+    <string name="downloadStart">download start</string>
+    <string name="selectServerType">select server type</string>
+    <string name="cnServer">cn server</string>
+    <string name="selectAmbiguity">select ambiguity</string>
+    <string name="selectTransparency">select transparency</string>
+    <string name="widgetConfigNotice">"NOTICE: all config only "</string>
+    <string name="gachaPoolInfo">gacha pool info</string>
+    <string name="activityInfo">activity info</string>
+    <string name="flushTime">flush time</string>
+    <string name="lestTime">lest %s</string>
+    <string name="lestTimeDay">lest %s day</string>
+    <string name="lestTimeHour">lest %s hour</string>
+    <string name="widgetFlushing">updating</string>
+    <string name="widgetFlushTime">%s updated</string>
+    <string name="downloadNotificationTitle">download progress</string>
 </resources>

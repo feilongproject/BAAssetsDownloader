@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/main">
+
+    <!--  背景  -->
+    <ImageView android:id="@+id/widgetBackground"
+               android:src="@mipmap/widget_background"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:scaleType="centerCrop"
+               android:contentDescription="TODO"
+               android:alpha="1"
+               tools:ignore="ContentDescription,HardcodedText"/>
+
+    <!--  内容  -->
+    <LinearLayout android:layout_width="fill_parent"
+                  android:layout_height="fill_parent"
+                  android:orientation="vertical"
+                  android:paddingTop="5sp"
+                  android:padding="15sp">
+
+        <!--  标题  -->
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content">
+
+            <!--  应用名称  -->
+            <TextView android:text="@string/app_name"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      style="@style/TextStyle"/>
+
+            <!--  设置按钮  -->
+            <ImageButton android:id="@+id/widgetConfigure"
+                         android:layout_width="wrap_content"
+                         android:layout_height="match_parent"
+                         android:src="@drawable/baseline_settings_15"
+                         android:contentDescription=""
+                         tools:ignore="ContentDescription"
+                         android:background="#00000000"/>
+
+            <!--  刷新时间  -->
+            <LinearLayout android:layout_width="fill_parent"
+                          android:layout_height="match_parent"
+                          android:gravity="end">
+                <ImageButton android:id="@+id/widgetFlush"
+                             android:layout_width="wrap_content"
+                             android:layout_height="match_parent"
+                             android:src="@drawable/baseline_loop_15"
+                             android:contentDescription=""
+                             android:background="#00000000"
+                             tools:ignore="ContentDescription"
+                             android:scaleType="fitEnd"/>
+<!--                <TextView android:layout_width="wrap_content"-->
+<!--                          android:layout_height="wrap_content"-->
+<!--                          android:text="@string/flushTime"-->
+<!--                          android:textColor="#aa000000"-->
+<!--                          android:textSize="15sp"-->
+<!--                          style="@style/TextStyle"/>-->
+                <TextView android:id="@+id/weightFlushTime"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="@string/widgetFlushing"
+                          android:textSize="15sp"
+                          android:layout_marginStart="3sp"
+                          android:textColor="#aa000000"
+                          style="@style/TextStyle"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!--  卡池信息  -->
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:layout_marginTop="5sp">
+
+            <!--  标题文字  -->
+            <TextView android:text="@string/gachaPoolInfo"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:textSize="15sp"
+                      android:textColor="#99000000"
+                      style="@style/TextStyle"/>
+
+            <!--  卡池信息（文字）  -->
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content">
+                <!--  卡池up名称  -->
+                <TextView android:id="@+id/gachaPoolName"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/black"
+                          android:text="@string/getting"
+                          style="@style/TextStyle"/>
+                <!--  卡池up时间  -->
+                <TextView android:id="@+id/gachaPoolTime"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:gravity="end"
+                          android:textColor="@color/black"
+                          android:text="@string/getting"
+                          style="@style/TextStyle"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!--  活动信息  -->
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:layout_marginTop="10sp">
+
+            <!--  标题文字  -->
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="@string/activityInfo"
+                      android:textSize="15sp"
+                      android:textColor="#99000000"
+                      style="@style/TextStyle"/>
+
+            <!--  活动信息（多列表）  -->
+            <ListView android:id="@+id/activityList"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical">
+            </ListView>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</FrameLayout>

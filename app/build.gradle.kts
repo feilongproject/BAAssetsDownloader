@@ -12,13 +12,13 @@ plugins {
 }
 
 android {
-    compileSdkPreview = "UpsideDownCake"
+    compileSdkVersion = "android-34"
     namespace = "com.feilongproject.baassetsdownloader"
 
     defaultConfig {
         applicationId = "com.feilongproject.baassetsdownloader"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = getSelfDefinedVersion("code").toInt()
         versionName = getSelfDefinedVersion("name")
 
@@ -64,6 +64,8 @@ android {
 
     buildFeatures {
         compose = true
+        dataBinding = true
+        viewBinding = true
     }
 
     composeOptions {
@@ -78,28 +80,32 @@ android {
 }
 
 dependencies {
-    implementation("com.microsoft.appcenter:appcenter-analytics:5.0.1")
-    implementation("com.microsoft.appcenter:appcenter-crashes:5.0.1")
-    implementation("com.microsoft.appcenter:appcenter-distribute:5.0.1")
+    implementation("com.microsoft.appcenter:appcenter-analytics:5.0.2")
+    implementation("com.microsoft.appcenter:appcenter-crashes:5.0.2")
+    implementation("com.microsoft.appcenter:appcenter-distribute:5.0.2")
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.21")
+//    implementation("androidx.glance:glance-material:1.0.0-rc01")
+    implementation("androidx.glance:glance-material3:1.0.0-rc01")
+    implementation("androidx.glance:glance-appwidget:1.0.0-rc01")
+
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-    implementation("androidx.appcompat:appcompat:1.7.0-alpha02")
-    implementation("androidx.activity:activity-compose:1.8.0-alpha04")
-    implementation("androidx.core:core-ktx:1.12.0-alpha04")
-    implementation("androidx.compose.ui:ui:1.5.0-alpha04")
-    implementation("androidx.compose.compiler:compiler:1.4.7")
-    implementation("androidx.compose.foundation:foundation:1.5.0-alpha03")
-    implementation("androidx.compose.material:material-icons-extended:1.4.3")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha01")
-    implementation("androidx.compose.material3:material3-window-size-class:1.2.0-alpha01")
+    implementation("androidx.appcompat:appcompat:1.7.0-alpha03")
+    implementation("androidx.activity:activity-compose:1.8.0-alpha07")
+    implementation("androidx.core:core-ktx:1.12.0-rc01")
+    implementation("androidx.compose.ui:ui:1.6.0-alpha04")
+    implementation("androidx.compose.compiler:compiler:1.5.2")
+    implementation("androidx.compose.foundation:foundation:1.6.0-alpha04")
+    implementation("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha06")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.0-alpha06")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:adapter-rxjava2:2.9.0")
-    implementation("com.google.android.material:material:1.10.0-alpha02")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.2-alpha")
+    implementation("com.google.android.material:material:1.11.0-alpha02")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.33.1-alpha")
     implementation("org.lz4:lz4-java:1.8.0")
 }
 

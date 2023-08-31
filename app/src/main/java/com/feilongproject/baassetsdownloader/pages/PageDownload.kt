@@ -32,9 +32,9 @@ import java.util.concurrent.atomic.AtomicReference
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: String) {
-    var assetLoadProgress by remember { mutableStateOf(0f) }
+    var assetLoadProgress by remember { mutableFloatStateOf(0f) }
     var assetLoadStatus: String? by remember { mutableStateOf(null) }
-    var downloadProgress by remember { mutableStateOf(0f) }
+    var downloadProgress by remember { mutableFloatStateOf(0f) }
     var showMultipleDownloadAssets by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val apkAssetInfo: ApkAssetInfo? by remember { mutableStateOf(ApkAssetInfo(context, selectServer)) }
@@ -146,7 +146,7 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
 
                 Divider(modifier = maxWidth.padding(top = 2.dp, bottom = 1.dp))
                 Divider(modifier = maxWidth.padding(top = 1.dp, bottom = 2.dp))
-                Crossfade(targetState = assetLoadProgress) { p ->
+                Crossfade(targetState = assetLoadProgress, label = "") { p ->
                     when (p) {
                         1f, -1f -> Column {
                             AssistChip(
@@ -357,6 +357,9 @@ fun MultipleFileDownload(context: Context, assetsBody: ServerTypes.DownloadApiRe
                             }
                         }
                     }
+
+                    //TODO: 全部下载完成之后强制所有通知显示已完成(或取消所有通知并显示全部下载完成)
+
 
                 }
 

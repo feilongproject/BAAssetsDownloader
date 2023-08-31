@@ -201,7 +201,7 @@ fun customApiUrl(context: Context, type: String, value: String): String {
 
         "custom" -> {
             try {
-                retrofitBuild(value)
+                retrofitBuild(value) // 测试url是否正常
                 editor.putString("customApiUrl", value)
             } catch (err: Exception) {
                 editor.putString("customApiUrl", null)

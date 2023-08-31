@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+           xmlns:tools="http://schemas.android.com/tools"
+           xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <style name="TextStyle">
+        <item name="android:textColor">@color/black</item> <!-- 设置字体颜色 -->
+<!--        <item name="android:textSize">16sp</item> &lt;!&ndash; 设置字体大小 &ndash;&gt;-->
+        <item name="android:textStyle">bold</item> <!-- 设置字体加粗 -->
+<!--        <item name="android:textAllCaps">true</item> &lt;!&ndash; 设置字体大写 &ndash;&gt;-->
+        <item name="android:textColorLink">#000000</item> <!-- 设置链接字体颜色 -->
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Stroke</item> <!-- 引用描边样式 -->
+    </style>
+
+
+    <style name="TextAppearance.AppCompat.Stroke">
+<!--        <item name="android:textColor">#FFFFFF</item> &lt;!&ndash; 设置字体颜色，与TextStyle中的颜色保持一致 &ndash;&gt;-->
+<!--        <item name="android:textSize">16sp</item> &lt;!&ndash; 设置字体大小，与TextStyle中的大小保持一致 &ndash;&gt;-->
+<!--        <item name="android:textStyle">bold</item> &lt;!&ndash; 设置字体加粗，与TextStyle中的加粗保持一致 &ndash;&gt;-->
+<!--        <item name="android:textAllCaps">true</item> &lt;!&ndash; 设置字体大写，与TextStyle中的大写保持一致 &ndash;&gt;-->
+        <item name="android:textColorLink">#000000</item> <!-- 设置链接字体颜色，与TextStyle中的颜色保持一致 -->
+        <item name="android:textColorHighlight">#FF0000</item> <!-- 设置高亮字体颜色 -->
+        <item name="android:textColorHint">#808080</item> <!-- 设置提示字体颜色 -->
+        <item name="android:textColorHighlightInverse">#FFFFFF</item> <!-- 设置高亮字体颜色反转 -->
+        <item name="android:textColorHintInverse">#FFFFFF</item> <!-- 设置提示字体颜色反转 -->
+        <item name="android:textAppearance">@null</item> <!-- 清除默认的文本外观 -->
+        <item name="android:shadowColor">#FFFFFF</item> <!-- 设置阴影颜色 -->
+        <item name="android:shadowRadius">10</item> <!-- 设置阴影半径 -->
+        <item name="android:shadowDx">0.1</item> <!-- 设置阴影X偏移 -->
+        <item name="android:shadowDy">0.1</item> <!-- 设置阴影Y偏移 -->
+<!--        <item name="android:background">@drawable/text_stroke</item> &lt;!&ndash; 设置描边样式 &ndash;&gt;-->
+    </style>
+</resources>

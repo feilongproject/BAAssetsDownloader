@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  默认  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="horizontal"
+              android:id="@+id/activityListDefault"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              tools:ignore="UselessParent">
+    <TextView android:id="@+id/widgetDefaultKey"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/getting"
+              style="@style/TextStyle"/>
+    <TextView android:id="@+id/widgetDefaultValue"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:gravity="end"
+              android:text="@string/getting"
+              style="@style/TextStyle"/>
+</LinearLayout>

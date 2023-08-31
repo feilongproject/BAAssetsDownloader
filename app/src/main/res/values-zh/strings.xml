@@ -36,7 +36,7 @@
         碧蓝档案下载器(BAAssetsDownloader/BAAD)<br>
         是一款专门用来下载手游《碧蓝档案》资源的app。<br>
         可下载内容包括：apk安装包/obb数据包，资源包下载正在测试。<br>
-        下载器已在<a href="https://github.com/feilongproject/BAAssestDownloader">GitHub</a>开源，
+        下载器已在<a href="https://github.com/feilongproject/BAAssetsDownloader">GitHub</a>开源，
         欢迎到<a href="https://afdian.net/a/feilongproject">爱发电平台</a>进行赞助!
     ]]></string>
     <string name="forAndroid11HelloWindow"><![CDATA[
@@ -56,19 +56,21 @@
     <string name="downloadHelpJp">日服需要同时安装应用包(apk)与数据包(obb)</string>
     <string name="downloadHelpGlobal">国际服只需安装应用包(apk)</string>
     <string name="notFoundLocalApk">未找到本地apk文件, 请下载安装包</string>
-    <string name="waringWithoutObbDir">注意: 检测到未打开或未安装应用, 请在安装后至少打开一次</string>
+    <string name="waringWithoutObbDir">注意: 检测到未打开或未安装应用, 请在安装后至少打开一次并关闭</string>
     <string name="askMeOneDayLater">一天后问我</string>
     <string name="versionUpdateDialogTitle">有新版本可更新</string>
     <string name="changelog">更新日志</string>
 
     <string name="jpServer">日服</string>
     <string name="globalServer">国际服</string>
+    <string name="cnServer">国服</string>
     <string name="packageName">包名:</string>
     <string name="serverName">类型:</string>
     <string name="packageStatus">状态:</string>
     <string name="nowSelect">现在选择:</string>
 
     <string name="download">下载</string>
+    <string name="downloadStart">下载开始</string>
     <string name="downloading">下载中</string>
     <string name="downloaded">下载完毕</string>
     <string name="downloadedObb">数据包下载完毕</string>
@@ -102,14 +104,14 @@
     <string name="apkNotSameServerVersion">应用与服务器版本不匹配, 请更新</string>
     <string name="apkSameServerVersion">应用与服务器版本匹配, 无需更新</string>
     <string name="obbNotSameServerVersion">数据包与服务器版本不匹配, 请更新</string>
-    <string name="obbNotSameServerVersionWithoutPermission">无权限查看数据包版本</string>
+    <string name="obbNotSameServerVersionWithoutPermission">数据包版本不存在或无权限查看</string>
     <string name="obbSameServerVersion">数据包与服务器版本匹配, 无需更新</string>
 
     <string name="selectFileDir">选择文件夹</string>
     <string name="noStoragePermissionObb">无数据包存储权限, 请在系统设置中开启存储权限并重启应用</string>
     <string name="noStoragePermissionBundles">无资源包存储权限, 请在系统设置中开启存储权限并重启应用</string>
     <string name="noStoragePermission11">
-        无数据包存储权限\n
+        无存储权限\n
         请在打开界面中选择文件夹保存\n\n
         请务必保证打开过一次游戏\n
         否则将无法选中
@@ -125,9 +127,22 @@
     <string name="notNumberWarn">仅允许输入数字</string>
     <string name="threadNumber">下载线程数量</string>
 
-<!--    <string name="downloadNotificationTitle">下载进度</string>-->
+    <string name="downloadNotificationTitle">下载进度</string>
     <string name="downloadNotificationContent">%s下载进度: %d(约)/%d 失败次数: %d</string>
     <string name="downloadNotificationChannelName">显示下载进度</string>
     <string name="downloadNotificationChannelDesc">使用进度条显示当前下载进度</string>
     <string name="downloadNotificationFinish">%s下载完毕</string>
+
+    <string name="widgetConfigNotice">注意：所有设置仅在保存后才会生效</string>
+    <string name="selectServerType">选择服务器类型</string>
+    <string name="selectAmbiguity">选择模糊度(0为无模糊，1为完全模糊)</string>
+    <string name="selectTransparency">选择透明度(0为完全透明，1为完全不透明)</string>
+    <string name="gachaPoolInfo">卡池信息</string>
+    <string name="activityInfo">活动列表</string>
+    <string name="flushTime">刷新时间：</string>
+    <string name="lestTime">剩余%s</string>
+    <string name="lestTimeDay">剩余%s天</string>
+    <string name="lestTimeHour">剩余%s小时</string>
+    <string name="widgetFlushing">更新中</string>
+    <string name="widgetFlushTime">%s更新</string>
 </resources>

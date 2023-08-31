@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:theme="@style/Theme.Material3.DayNight"
+        android:background="?attr/colorOnPrimary"
+        android:orientation="vertical">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+        <!--  标题  -->
+        <TextView android:id="@+id/text"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/app_name"
+                  android:padding="10sp"/>
+
+        <!--  服务器选择  -->
+        <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginLeft="30sp"
+                android:layout_marginRight="30sp"
+                android:orientation="vertical"
+                android:background="@drawable/round_button"
+                android:padding="15sp"
+                android:layout_marginBottom="10sp">
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="@string/widgetConfigNotice"/>
+        </LinearLayout>
+
+        <!--  服务器选择  -->
+        <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginLeft="30sp"
+                android:layout_marginRight="30sp"
+                android:orientation="vertical"
+                android:background="@drawable/round_button"
+                android:padding="10sp"
+                android:layout_marginBottom="10sp">
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="@string/selectServerType"/>
+            <RadioGroup android:id="@+id/serverType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                <RadioButton android:id="@+id/selectServerJp"
+                             android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:text="@string/jpServer"
+                             android:checked="true"/>
+                <RadioButton android:id="@+id/selectServerGlobal"
+                             android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:text="@string/globalServer"/>
+                <RadioButton android:id="@+id/selectServerCn"
+                             android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:text="@string/cnServer"/>
+            </RadioGroup>
+        </LinearLayout>
+
+        <!--  透明/模糊度选择  -->
+        <LinearLayout android:layout_height="wrap_content"
+                      android:layout_width="match_parent"
+                      android:layout_marginLeft="30sp"
+                      android:layout_marginRight="30sp"
+                      android:orientation="vertical"
+                      android:background="@drawable/round_button"
+                      android:padding="10sp"
+                      android:minWidth="100sp">
+
+            <!--  模糊度标题  -->
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="@string/selectAmbiguity"/>
+            <!--  调节模糊度  -->
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:orientation="horizontal">
+                <TextView android:id="@+id/ambiguityValue"
+                          android:layout_width="wrap_content"
+                          android:layout_height="match_parent"
+                          android:text="0.00"
+                          tools:ignore="HardcodedText"/>
+                <SeekBar android:id="@+id/selectAmbiguity"
+                         android:layout_width="match_parent"
+                         android:layout_height="match_parent"
+                         android:progress="0"
+                         android:max="100"/>
+            </LinearLayout>
+
+            <!--  透明度标题  -->
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="@string/selectTransparency"/>
+            <!--  调节透明度  -->
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:orientation="horizontal">
+                <TextView android:id="@+id/transparencyValue"
+                          android:layout_width="wrap_content"
+                          android:layout_height="match_parent"
+                          android:text="1.00"
+                          tools:ignore="HardcodedText"/>
+                <SeekBar android:id="@+id/selectTransparency"
+                         android:layout_width="match_parent"
+                         android:layout_height="match_parent"
+                         android:progress="100"
+                         android:max="100"/>
+            </LinearLayout>
+
+            <!--  预览图  -->
+            <ImageView android:id="@+id/preview"
+                       android:layout_width="match_parent"
+                       android:layout_height="200sp"
+                       android:layout_gravity="center_horizontal"
+                       android:src="@mipmap/widget_background"
+            android:scaleType="centerInside"/>
+        </LinearLayout>
+
+        <!--  取消/确认  -->
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:padding="10sp">
+            <Button android:id="@+id/quit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/quit"
+                    android:layout_marginEnd="5sp"
+                    android:background="@drawable/round_button"
+                    style="@style/Widget.AppCompat.Button.Borderless"/>
+            <Button android:id="@+id/enter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enter"
+                    android:layout_marginStart="5sp"
+                    android:background="@drawable/round_button"
+                    style="@style/Widget.AppCompat.Button.Borderless"/>
+            <!--@style/Widget.AppCompat.Button.Colored-->
+            <!--@drawable/round_button-->
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>

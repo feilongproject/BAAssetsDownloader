@@ -7,6 +7,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage"/>
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <queries>
         <package android:name="com.nexon.bluearchive"/>
         <package android:name="com.YostarJP.BlueArchive"/>
@@ -20,7 +23,9 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/Theme.BAAssetsDownloader"
-            tools:targetApi="31">
+            tools:targetApi="34"
+            android:enableOnBackInvokedCallback="true">
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="com.feilongproject.baassetsdownloader.FileProvider"
@@ -28,6 +33,7 @@
                 android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_provider_paths"/>
         </provider>
+
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
@@ -37,5 +43,43 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!--  传统layout小组件  -->
+        <receiver android:name=".provider.WidgetProvider"
+                  android:enabled="true"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.feilongproject.baassetsdownloader.UPDATE_WIDGET"/>
+                <action android:name="com.feilongproject.baassetsdownloader.UPDATE_CONFIGURE"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget"/>
+        </receiver>
+
+        <!--  小组件定时刷新  -->
+        <receiver android:name=".receiver.WidgetUpdateReceiver"
+                  android:enabled="true"
+                  android:exported="true">
+        </receiver>
+
+        <!--  小组件设置界面  -->
+        <activity android:name=".WidgetConfigure"
+                  android:enabled="true"
+                  android:exported="true"
+                  android:theme="@style/Theme.BAAssetsDownloader">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+                <!--  <action android:name="android.intent.action.MAIN"/>  -->
+                <!--  <category android:name="android.intent.category.LAUNCHER"/>  -->
+            </intent-filter>
+        </activity>
+
+        <!--  小组件列表(不加上MIUI12系统桌面会直接报java.lang.SecurityException)  -->
+        <service android:name=".provider.AppWidgetService"
+                 android:exported="false"
+                 android:permission="android.permission.BIND_REMOTEVIEWS">
+        </service>
+
     </application>
 </manifest>

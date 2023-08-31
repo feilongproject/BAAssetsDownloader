@@ -26,6 +26,11 @@ interface ServerAPI {
     @POST("/downloadApi")
     fun downloadApi(@Body body: ServerTypes.ServerTypeRequest): Call<ServerTypes.DownloadApiResponse>
 
+    // https://assets.schale.top/widgetInfo
+    @POST("/widgetInfo")
+    fun widgetInfo(@Body body: ServerTypes.ServerTypeRequest): Call<ServerTypes.WidgetInfoResponse>
+
+
 }
 
 interface DownloadService {
@@ -90,6 +95,25 @@ class ServerTypes {
             )
         }
     }
+
+    data class WidgetInfoResponse(
+        @SerializedName("data")
+        val data: List<Data>
+    ) {
+        data class Data(
+            @SerializedName("area")
+            val area: String,
+            @SerializedName("end")
+            val end: Int,
+            @SerializedName("start")
+            val start: Int,
+            @SerializedName("title")
+            val title: String,
+            @SerializedName("type")
+            val type: String,
+        )
+    }
+
 }
 
 

@@ -280,20 +280,20 @@ fun howToShowHelloWindow(context: Context, isSet: Boolean, value: Boolean): Bool
 }
 
 class Pref(context: Context, prefName: String) {
-    private val perf: SharedPreferences = context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
+    private val pref: SharedPreferences = context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
     private var editor: SharedPreferences.Editor? = null
 
     fun <T> getValue(key: String, value: T): T {
         return when (value) {
-            is String -> perf.getString(key, value) as T
-            is Boolean -> perf.getBoolean(key, value) as T
-            is Int -> perf.getInt(key, value) as T
+            is String -> pref.getString(key, value) as T
+            is Boolean -> pref.getBoolean(key, value) as T
+            is Int -> pref.getInt(key, value) as T
             else -> "" as T
         }
     }
 
     fun <T> putValue(key: String, value: T): T {
-        editor = perf.edit()
+        editor = pref.edit()
         when (value) {
             is String -> editor?.putString(key, value)
             is Boolean -> editor?.putBoolean(key, value)
