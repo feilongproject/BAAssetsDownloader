@@ -90,13 +90,14 @@ class FileUtil(private val filePath: String, private val context: Context) {
         get() = (fullFilePath.startsWith(externalStorageDir))
 
     val highVersionFix: Boolean
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && isExternalStorage
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && isExternalStorage && !baseFilePath.startsWith("$externalStorageDir/Android/obb")
 
     init {
-        Log.i("FLP_FileUtil.init", "filePath: $filePath")
+        Log.i("FLP_FileUtil.init", "filePath: $filePath\nbaseFilePath: $baseFilePath\nhighVersionFix: $highVersionFix")
         if (highVersionFix) {
             docPath = mkDir()
             docFile = docPath?.findFile(name)
+            Log.i("FLP_FileUtil.init", "docPath: $docPath $docFile")
 //            Log.d("FLP_DEBUG", "docPath: ${docPath?.uri} R/W: ${docPath?.canRead()}/${docPath?.canWrite()}")
 //            Log.d("FLP_DEBUG", "docFile: ${docFile?.uri} R/W: ${docFile?.canRead()}/${docFile?.canWrite()}")
         }
@@ -107,36 +108,19 @@ class FileUtil(private val filePath: String, private val context: Context) {
         else file.delete()
     }
 
-//    fun listDir(path: String?) {
-//        val sp = path?.split("/")
-//
-//        for (uri in context.contentResolver.persistedUriPermissions) {
-//
-//            Log.d("FLP_FileUtil.listDir", "uri.uri.path: ${uri.uri.path} $sp")
-//            Log.d("FLP_FileUtil.listDir", "isRead: ${uri.isReadPermission} isWrite: ${uri.isWritePermission}")
-//
-//            val doc = DocumentFile.fromTreeUri(context, uri.uri)
-//
-//            with(doc) {
-//                if (this == null) return
-//                Log.d("FLP_FileUtil", "${uri.uri.path}/$name isDirectory: $isDirectory")
-//
-//                if (isDirectory) {
-//                    for (d in listFiles()) {
-//                        Log.d("FLP_FileUtil.listDir", "${uri.uri.path}/$name/${d.name}")
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    private fun mkDir(): DocumentFile? {
+    fun mkDir(): DocumentFile? {
         //Throwable().printStackTrace()
         // /storage/emulated/0/Android/obb/com.YostarJP.BlueArchive/-> Android/obb/com.YostarJP.BlueArchive/
         val androidPath = path.replace("/storage/emulated/0/", "")
 
         Log.d("FLP_FileUtil.mkdir", "")
         Log.d("FLP_FileUtil.mkdir", "androidPath: $androidPath")
+
+        if (androidPath.contains(context.packageName)) {
+            Log.d("FLP_FileUtil.mkdir", "self path: $file\n${file.parentFile}\n${file.parentFile?.mkdirs()}")
+            return file.parentFile?.let { DocumentFile.fromFile(it) }
+        }
+
         for (uriPermission in context.contentResolver.persistedUriPermissions) {
             Log.d(
                 "FLP_FileUtil.mkdir",
@@ -173,8 +157,12 @@ class FileUtil(private val filePath: String, private val context: Context) {
     }
 
     private fun findFileUri(pathInfo: DocumentFile): Uri? {
-        Log.d("FLP_FileUtil.findFileUri", "pathInfo name: $pathInfo ")
-        return pathInfo.findFile(name)?.uri ?: pathInfo.createFile("application/octet-stream", name)?.uri
+        Log.d("FLP_FileUtil.findFileUri", "pathInfo name: ${pathInfo.uri} $name")
+        return pathInfo.findFile(name)?.uri.apply {
+            Log.d("FLP_FileUtil.findFileUri", "findFile ${this.toString()}")
+        } ?: pathInfo.createFile("*/*", name)?.uri.apply {
+            Log.d("FLP_FileUtil.findFileUri", "createFile ${this.toString()}")
+        }
     }
 
     fun makeEmptyFile(): Boolean {
@@ -199,6 +187,8 @@ class FileUtil(private val filePath: String, private val context: Context) {
     fun saveToFile(inputStream: InputStream, downloadListener: DownloadListener) {
 //        Log.d("FLP_DEBUG", "saveToFile: $fullFilePath highVersionFix: $highVersionFix")
         try {
+            Log.d("FLP_DEBUG_saveToFile", "docPath: $docPath\nfile: $file")
+
 //            if (!file.canWrite()) return downloadListener.onFailure("no Permission $fullFilePath")
             var len: Int
             var currentLength: Long = 0
@@ -218,13 +208,18 @@ class FileUtil(private val filePath: String, private val context: Context) {
             }
             val buff = ByteArray(1024 * 1024) //设置buff块大小
 
+            Log.d("FLP_DEBUG_saveToFile", "fd: $fd\nfileDescriptor: ${fd?.fileDescriptor.toString()}")
+
             inputStream.use { input ->
                 outputStream.use { output ->
                     while ((input.read(buff).also { len = it }) != -1) {
 //                Log.d("FLP_Download", "当前进度: $currentLength")
                         output.write(buff, 0, len)
                         currentLength += len
-                        downloadListener.onProgress(currentLength)
+                        downloadListener.onProgress(currentLength).let {
+                            if (it != null) return downloadListener.onFailure(it)
+                        }
+
                     }
                 }
             }
@@ -253,7 +248,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
             }
 
             else -> {
-                context.showToastResId(R.string.noStoragePermissionObb, true)
+                context.showToast(R.string.noStoragePermission, true)
                 val intent = Intent()
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
@@ -290,7 +285,7 @@ class FileUtil(private val filePath: String, private val context: Context) {
                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
                     intent.flags = intentFlag
                     intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, documentFile.uri)
-                    act.startActivityForResult(intent, RequestPermissionCode)
+                    act.startActivityForResult(intent, REQUEST_PERMISSIONS_CODE)
                 }
                 .setNeutralButton(context.getString(R.string.openGame)) { _, _ ->
                     if (packageNameMap["jpServer"]?.let { openApplication(context, it) } == null) {
@@ -305,5 +300,23 @@ class FileUtil(private val filePath: String, private val context: Context) {
                 .create()
                 .show()
         }
+    }
+
+    fun moveTo(toFile: FileUtil) {
+        toFile.file.parentFile?.mkdirs()
+        FileInputStream(file).use { fis ->
+            FileOutputStream(toFile.file).use { fos ->
+                // 设置缓冲区大小
+                val buffer = ByteArray(1024)
+                var length: Int
+
+                // 读取源文件内容，并写入目标文件
+                while (fis.read(buffer).also { length = it } > 0) {
+                    fos.write(buffer, 0, length)
+                }
+                Log.d("FLP_FileUtil.moveTo", "moveTo ok ${file.delete()}")
+            }
+        }
+
     }
 }

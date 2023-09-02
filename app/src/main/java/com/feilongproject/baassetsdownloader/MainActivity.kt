@@ -41,10 +41,14 @@ import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import com.microsoft.appcenter.distribute.Distribute
 import kotlinx.coroutines.launch
-import net.jpountz.xxhash.*
+import net.jpountz.xxhash.XXHashFactory
+import kotlin.system.exitProcess
 
 
-const val RequestPermissionCode = 1145141919
+const val REQUEST_PERMISSIONS_CODE = 114514191
+const val INSTALL_UNKNOWN_APP_CODE = 456789123
+const val RESTART_APPLICATION_CODE = 256385697
+
 val maxWidth = Modifier.fillMaxWidth()
 val externalStorageDir = Environment.getExternalStorageDirectory().toString()
 
@@ -60,29 +64,49 @@ class MainActivity : ComponentActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
         Log.d(
-            "FLP_DEBUG",
+            "FLP_DEBUG_onActivityResult",
             "onActivityResult requestCode: $requestCode, resultCode: $resultCode, data:${data.toString()}"
         )
-        if (data?.data == null) return
+        super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
-            RequestPermissionCode -> {
+            REQUEST_PERMISSIONS_CODE -> {
+                if (data?.data == null) return
                 val spPath = data.data!!.path?.replace("/tree/primary:Android/", "")
                 Log.d("FLP_DEBUG", "已授权: $spPath")
                 showToast("已授权: $spPath")
                 val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 grantUriPermission(packageName, data.data, flag)
                 contentResolver.takePersistableUriPermission(data.data!!, flag)
+                restartApplication()
+            }
+
+            INSTALL_UNKNOWN_APP_CODE -> {
+                if (resultCode == RESULT_OK) {
+                    Log.d("FLP_DEBUG_onActivityResult", "restarting activity")
+                    restartApplication()
+                } else {
+                    baseContext.showToast(baseContext.getString(R.string.noPermissionError))
+                }
+            }
+
+            RESTART_APPLICATION_CODE -> {
+                restartApplication()
             }
         }
     }
 
+    private fun restartApplication() {
+        android.os.Process.killProcess(android.os.Process.myPid())
+        exitProcess(0)
+    }
+
     private fun checkPermissions() {
+        Log.d("FLP_DEBUG", "准备请求授权")
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
-                val permissions = mutableListOf("obb/com.YostarJP.BlueArchive/", "data/com.YostarJP.BlueArchive/")
+                val permissions = mutableListOf("data/com.YostarJP.BlueArchive/")
                 showToast("检查授权列表\n$permissions")
                 Log.d("FLP_DEBUG", "检查授权列表\n$permissions")
 
@@ -136,7 +160,7 @@ class MainActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback(this) {
             val currentTIme = System.currentTimeMillis()
             if (currentTIme - lastBackPressTime >= 2000) {
-                showToastResId(R.string.pressAgainExit)
+                showToast(R.string.pressAgainExit)
                 lastBackPressTime = currentTIme
             } else finish()
         }
@@ -154,9 +178,9 @@ class MainActivity : ComponentActivity() {
                         AndroidView(
                             factory = { context ->
                                 TextView(context).apply {
-                                    text = HtmlCompat.fromHtml(resString(R.string.helloMessage).let {
+                                    text = HtmlCompat.fromHtml(getString(R.string.helloMessage).let {
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-                                            it + "<br><br>" + resString(R.string.forAndroid11HelloWindow)
+                                            it + "<br><br>" + getString(R.string.forAndroid11HelloWindow)
                                         else it
                                     }, HtmlCompat.FROM_HTML_MODE_LEGACY)
                                     movementMethod = LinkMovementMethod.getInstance()
@@ -252,7 +276,7 @@ fun MainWindow(modifier: Modifier) {
                         "download" -> {
                             if (selectServer == null) {
                                 selectedItem = "home"
-                                LocalContext.current.showToastResId(R.string.notSelect)
+                                LocalContext.current.showToast(R.string.notSelect)
                             } else PageDownload(modifier, padding, selectServer!!)
                         }
 
@@ -309,13 +333,10 @@ fun Context.showToast(message: String, isLong: Boolean = false) {
     Toast.makeText(this, message, if (isLong) Toast.LENGTH_SHORT else Toast.LENGTH_SHORT).show()
 }
 
-fun Context.showToastResId(id: Int, isLong: Boolean = false) {
-    showToast(resString(id), isLong)
+fun Context.showToast(resId: Int, isLong: Boolean = false) {
+    Toast.makeText(this, this.getString(resId), if (isLong) Toast.LENGTH_SHORT else Toast.LENGTH_SHORT).show()
 }
 
-fun Context.resString(id: Int): String {
-    return resources.getString(id)
-}
 
 fun Context.findActivity(): Activity? {
     if (this is Activity) return this

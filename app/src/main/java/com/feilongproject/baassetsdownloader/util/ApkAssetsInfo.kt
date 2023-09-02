@@ -1,6 +1,5 @@
 package com.feilongproject.baassetsdownloader.util
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -17,57 +16,56 @@ import com.feilongproject.baassetsdownloader.pages.AppInformation
 import com.feilongproject.baassetsdownloader.pages.packageNameMap
 import com.microsoft.appcenter.analytics.Analytics
 import java.io.File
+import java.util.Date
 
 class ApkAssetInfo(private val context: Context, val serverType: String) {
     private val customAPI: ServerAPI = retrofitBuild(customApiUrl(context, "get", "")).create(ServerAPI::class.java)
 
     private var localApkInfo: AppInformation? = getAppInfo(context, packageNameMap[serverType]!!)
-    private val localApkLength: Long?
-        get() = localApkInfo?.packageLength
     val localVersionName: String?
         get() = localApkInfo?.versionName
-    val localVersionCode: Long?
-        get() = localApkInfo?.versionCode
 
     val needUpdateApk: Boolean
         get() = localVersionName != serverVersionName
     val needUpdateObb: Boolean
-        get() = (localObbFile?.length != serverObbLength) || (serverObbLength == null)
+        get() = !obbFilePath.exists
 
 
-    var serverApkLength: Long? = null
     var serverVersionName: String? = null
     var serverVersionCode: String? = null
     var serverObbLength: Long? = null
     var serverApkMD5: String? = null
 
-    val localObbFile: FileUtil?
-        get() {
-            return if (serverVersionCode != null)
-                _localObbFile ?: FileUtil(localObbFilePath, context).apply { _localObbFile = this }
-            else null
-        }
-    private var _localObbFile: FileUtil? = null
-    private val localObbFilePath
+    private val apkFilePathString
+        get() = "${context.externalCacheDir?.absolutePath ?: context.cacheDir.toString()}/${packageNameMap[serverType]}_$serverVersionName.apk"
+    private val apkDownloadingFilePathString
+        get() = "${context.externalCacheDir?.absolutePath ?: context.cacheDir.toString()}/${packageNameMap[serverType]}_$serverVersionName.downloading.apk"
+    private val apkFilePath: FileUtil
+        get() = FileUtil(apkFilePathString, context)
+    private val apkDownloadingFilePath: FileUtil
+        get() = FileUtil(apkDownloadingFilePathString, context)
+
+    private val obbFilePathString
         get() = "$externalStorageDir/Android/obb/${packageNameMap[serverType]}/main.$serverVersionCode.${packageNameMap[serverType]}.obb"
+    private val obbDownloadingFilePathString
+        get() = "${context.externalCacheDir?.absolutePath ?: context.cacheDir.toString()}/main.$serverVersionCode.${packageNameMap[serverType]}.downloading.obb"
+    val obbFilePath: FileUtil
+        get() = FileUtil(obbFilePathString, context)
+    private val obbDownloadingFilePath: FileUtil
+        get() = FileUtil(obbDownloadingFilePathString, context)
+
 
     private val localAssetsPath = FileUtil("$externalStorageDir/Android/data/${packageNameMap[serverType]}/", context)
 
-    private val cacheApkFile: FileUtil
-        get() {
-            return FileUtil(
-                context.cacheDir.toString() + "/${packageNameMap[serverType]}_$serverVersionName.apk",
-                context
-            )
-        }
-
     var assetsBody: ServerTypes.DownloadApiResponse? = null
 
-
-    fun versionCheck(progress: (p: Float, i: String?, e: String?) -> Unit) {
+    /**
+     * p 只为 -1/0/1
+     */
+    fun versionCheck(progress: (p: Float, i: String?) -> Unit) {
         Log.d("FLP_DEBUG", "start $serverType versionCheck")
         Analytics.trackEvent("versionCheck $serverType")
-        progress(0f, context.resString(R.string.getting), null)
+        progress(0f, context.getString(R.string.getting))
         localApkInfo = getAppInfo(context, packageNameMap[serverType]!!)
         when (serverType) {
             "globalServer", "jpServer" -> {
@@ -76,19 +74,20 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
                     .enqueue(object : Callback<ServerTypes.VersionCheckResponse> {
                         override fun onResponse(
                             call: Call<ServerTypes.VersionCheckResponse>,
-                            response: Response<ServerTypes.VersionCheckResponse>
+                            res: Response<ServerTypes.VersionCheckResponse>
                         ) {
-                            val body = response.body()
+                            val body =
+                                res.body() ?: return progress(-1f, context.getString(R.string.getError))
                             Log.d("FLP_DEBUG", body.toString())
-                            serverVersionName = body?.versionName
-                            serverVersionCode = body?.versionCode
-                            serverObbLength = body?.obbLength
-                            serverApkMD5 = body?.apkMD5
-                            progress(1f, context.resString(R.string.getSuccess), null)
+                            serverVersionName = body.versionName
+                            serverVersionCode = body.versionCode
+                            serverObbLength = body.obbLength
+                            serverApkMD5 = body.apkMD5
+                            progress(1f, context.getString(R.string.getSuccess))
                         }
 
                         override fun onFailure(call: Call<ServerTypes.VersionCheckResponse>, t: Throwable) {
-                            progress(-1f, context.resString(R.string.getError) + "\n" + t.toString(), null)
+                            progress(-1f, context.getString(R.string.getError) + "\n" + t.toString())
                             Log.e("FLP_DEBUG", t.toString())
                             context.showToast(t.toString(), true)
                         }
@@ -96,235 +95,217 @@ class ApkAssetInfo(private val context: Context, val serverType: String) {
             }
 
             else -> {
-                progress(-1f, context.resString(R.string.TODO), null)
+                progress(-1f, context.getString(R.string.TODO))
             }
         }
     }
 
-    fun downloadApk(progress: (p: Float, i: String?, e: String?) -> Unit) {
-        Log.d("FLP_DEBUG", "start $serverType downloadApk")
-        Analytics.trackEvent("downloadApk $serverType")
+    fun downloadApkObb(progress: (p: Float, i: String?, e: String) -> Unit) {
+        Log.d("FLP_DEBUG_downloadApk", "start $serverType downloadApkObb")
+        Analytics.trackEvent("downloadApkObb $serverType")
         if (serverVersionName == null || serverVersionCode == null) {
-            progress(-1f, context.resString(R.string.notFoundServerVersion), null)
-            return context.showToastResId(R.string.notFoundServerVersion)
-        }//当不存在时返回: 未找到服务器版本
+            progress(-1f, context.getString(R.string.notFoundServerVersion), "update.common")
+            return context.showToast(R.string.notFoundServerVersion)
+        }// 当不存在时return未找到服务器版本
 
-        Log.d("FLP_DEBUG", "cacheApkFile.exists: ${cacheApkFile.exists}")
-        if (cacheApkFile.exists) {
-            if (cacheApkFile.md5 == serverApkMD5) return installApk(cacheApkFile, progress)
-        }//当存在并且文件md5长度相等时, 安装应用
+        if (!requestInstallPermission(context)) {
+            context.showToast(R.string.noStoragePermission)
+            return progress(-1f, context.getString(R.string.noStoragePermission), "update.common")
+        }// 无权限则return并弹出授权
 
-        progress(0f, context.resString(R.string.downloadApkStart), "btn.disable.apk")
-        customAPI
+        Log.d(
+            "FLP_DEBUG_downloadApkObb",
+            "cacheApkFile: ${apkFilePath.exists} $apkFilePath\ncacheApkFileDownloading: ${apkDownloadingFilePath.exists} $apkDownloadingFilePath"
+        )
+
+        Log.d(
+            "FLP_DEBUG_downloadApkObb",
+            "localObbFile: ${obbFilePath.fullFilePath}\nlocalObbFilePath: $obbFilePathString"
+        )
+
+        progress(0f, context.getString(R.string.downloadApkObbStart), "update.common")
+
+        var err: String? = null
+        if (apkFilePath.exists) {
+            progress(1f, null, "update.progress.apk")
+            installApk(progress) //当存在时, 安装应用(此时必为完整下载, 无需校验md5)
+        } else customAPI
             .downloadApk(ServerTypes.ServerTypeRequest(serverType))
-            .enqueue(downloadUtil(cacheApkFile, "apk", progress))
-    }
+            .enqueue(downloadUtil(apkDownloadingFilePath, "apk", progress) { e ->
+                e?.let { err = it }
+                if (err != null) progress(-2f, err, "update.common")
+                return@downloadUtil err
+            })
 
-    fun downloadObb(progress: (p: Float, i: String?, e: String?) -> Unit, installApkPath: FileUtil? = null) {
-        Analytics.trackEvent("downloadObb $serverType")
-        Log.d("FLP_DEBUG", "start $serverType downloadObb installApkPath: $installApkPath")
-        progress(0f, context.resString(R.string.downloadObbStart), "btn.disable.obb")
-        _localObbFile = FileUtil(localObbFilePath, context)
-        when {
-            serverType != "jpServer" -> {
-                return progress(-1f, "$serverType not have obb", null)
-            }  //仅日服存在obb
-            localObbFile == null -> {
-                return progress(-1f, "localObbFile not set", null)
-            }      //未设置localObbFile
-            (localObbFile!!.exists && localObbFile?.length == serverObbLength) -> {
-                return progress(1f, context.resString(R.string.downloadedObb), "btn.enable.obb")
-            }  //本地存在并且长度相等时返回
-            localObbFile?.checkPermission() != true -> {
-                return if (localObbFile?.highVersionFix == true)
-                    progress(-1f, context.getString(R.string.noStoragePermission11), null)
-                else progress(-1f, context.getString(R.string.noStoragePermissionObb), null)
-            }  //检查该文件是否有权限保存
-        }
 
-        customAPI
+        if (serverType == "globalServer") return progress(1f, null, "update.progress.obb")
+        if (obbFilePath.exists) progress(1f, null, "update.progress.obb")
+        else customAPI
             .downloadObb(ServerTypes.ServerTypeRequest(serverType))
-            .enqueue(downloadUtil(localObbFile!!, "obb", progress))
-        if ((installApkPath != null) && (installApkPath.highVersionFix))
-            installApk(installApkPath, progress)
+            .enqueue(downloadUtil(obbDownloadingFilePath, "obb", progress) { e ->
+                e?.let { err = it }
+                if (err != null) progress(-2f, err, "update.common")
+                return@downloadUtil err
+            })
+
+
     }
 
     fun downloadAssets(progress: (p: Float, i: String?, e: String?) -> Unit) {
+        if (serverType != "jpServer") return progress(-1f, context.getString(R.string.TODO), null)
+
         Log.i("FLP_downloadAssets", "start $serverType downloadAssets")
         Analytics.trackEvent("downloadAssets $serverType")
-        progress(0f, context.resString(R.string.downloadBundlesStart), null)
+        progress(0f, context.getString(R.string.downloadBundlesStart), null)
         when {
             !localAssetsPath.checkPermission() -> {
                 return if (localAssetsPath.highVersionFix)
                     progress(-1f, context.getString(R.string.noStoragePermission11), null)
-                else progress(-1f, context.getString(R.string.noStoragePermissionObb), null)
+                else progress(-1f, context.getString(R.string.noStoragePermission), null)
             }  //检查该文件是否有权限保存
         }
-        when (serverType) {
-            "jpServer" -> {
-                customAPI
-                    .downloadApi(ServerTypes.ServerTypeRequest(serverType))
-                    .enqueue(object : Callback<ServerTypes.DownloadApiResponse> {
-                        override fun onResponse(
-                            call: Call<ServerTypes.DownloadApiResponse>,
-                            response: Response<ServerTypes.DownloadApiResponse>
-                        ) {
-                            val body =
-                                response.body() ?: return progress(-1f, context.resString(R.string.getError), null)
-                            Log.d("FLP_DEBUG", body.toString())
 
-//                            var totSize = 0
-//                            for ((_, bundleInfo) in body.bundleInfo) {
-////                                assetsList[path] = bundleInfo
-//                                totSize += bundleInfo.files.size
-////                                for (file in bundleInfo.files) {
-//////                                    Log.d("FLP_TEST", "file.key ${file.key} file.value ${file.value}")
-////                                    assetsList[file.key] = AssetFile(
-////                                        baseUrl = body.baseUrl,
-////                                        urlPath = bundleInfo.urlPath + file.key,
-//////                                        saveFile = bundleInfo.key + file.key,
-////                                        savePathName = path + turnNameRule(bundleInfo.saveNameRule, file),
-////                                        datPathName = bundleInfo.saveNameRuleDat?.let { path + turnNameRule(it, file) },
-////                                        hashType = bundleInfo.hashType,
-////                                        hash = file.value.hash,
-////                                        size = file.value.size,
-////                                    )
-////                                }
+        customAPI
+            .downloadApi(ServerTypes.ServerTypeRequest(serverType))
+            .enqueue(object : Callback<ServerTypes.DownloadApiResponse> {
+                override fun onResponse(
+                    call: Call<ServerTypes.DownloadApiResponse>,
+                    res: Response<ServerTypes.DownloadApiResponse>
+                ) {
+                    assetsBody = res.body() ?: return progress(-1f, context.getString(R.string.getError), null)
+                    Log.d("FLP_downloadAssets", "downloadApi.assetsBody: ${assetsBody.toString()}")
+
+                    if (assetsBody!!.notice.let {
+                            Log.d("FLP_downloadAssets", "downloadApi.assetsBody!!.notice: $it ${Date().time}")
+                            (it.timeStart <= Date().time) && (Date().time <= it.timeEnd)
+                        }) {
+                        AlertDialog.Builder(context)
+                            .setMessage(R.string.assetsNotAlready)
+                            .setPositiveButton(R.string.enter) { _, _ ->
+                                progress(-1f, context.getString(R.string.downloadCancel), null)
+                            }
+//                            .setNeutralButton(R.string.quit) { _, _ ->
 //                            }
-                            assetsBody = body
-                            progress(
-                                1f,
-                                context.getString(R.string.getAssetsNum, body.total),
-                                "downloadBundle"
-                            )
-                        }
+//                            .setNegativeButton(R.string.quit) { _, _ ->
+//                            }
+                            .setCancelable(false)
+                            .show()
 
-                        override fun onFailure(call: Call<ServerTypes.DownloadApiResponse>, t: Throwable) {
-                            progress(-1f, context.resString(R.string.getError) + "\n" + t.toString(), null)
-                            Log.e("FLP_DEBUG", t.toString())
-                            context.showToast(t.toString(), true)
-                        }
-                    })
-            }
+                    } else {
+                        progress(
+                            1f,
+                            context.getString(R.string.getAssetsNum, assetsBody?.total ?: 0),
+                            "downloadBundle"
+                        )
+                    }
 
-            else -> {
-                progress(-1f, context.resString(R.string.TODO), null)
-            }
-        }
+                }
+
+                override fun onFailure(call: Call<ServerTypes.DownloadApiResponse>, t: Throwable) {
+                    progress(-1f, context.getString(R.string.getError) + "\n" + t.toString(), null)
+                    Log.e("FLP_DEBUG", t.toString())
+                    context.showToast(t.toString(), true)
+                }
+            })
+
 
     }
 
-    private fun downloadUtil(saveFile: FileUtil, type: String, progress: (p: Float, i: String?, e: String?) -> Unit) =
-        object : Callback<ResponseBody> {
-            @SuppressLint("SuspiciousIndentation")
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                Log.d("FLP_downloadUtil.onResponse", "start $serverType onResponse")
-                var totalLength: Long? = null
-                var sameForServer = false
-                var progressNotice = ""
+    private fun downloadUtil(
+        saveFile: FileUtil,
+        fileType: String,
+        progress: (p: Float, i: String?, e: String) -> Unit,
+        isBreak: (err: String?) -> String?,
+    ) = object : Callback<ResponseBody> {
+        override fun onResponse(call: Call<ResponseBody>, res: Response<ResponseBody>) {
+            Log.d("FLP_downloadUtil.onResponse", "start $serverType onResponse")
+            val fileLength: Long =
+                res.body()?.contentLength() ?: return progress(
+                    -1f,
+                    "$fileType fileLength not set",
+                    "update.common"
+                )
+            var progressNotice = ""
 
-                when (type) {
-                    "apk" -> {
-                        serverApkLength = response.body()?.contentLength()
-                        totalLength = response.body()?.contentLength()
-                        if (saveFile.exists && saveFile.length == serverApkLength) sameForServer = true
-                        progressNotice = context.resString(R.string.downloadApkProgress)
-                    }
-
-                    "obb" -> {
-                        serverObbLength = response.body()?.contentLength()
-                        totalLength = response.body()?.contentLength()
-                        if (saveFile.exists && saveFile.length == serverObbLength) sameForServer = true
-                        progressNotice = context.resString(R.string.downloadObbProgress)
-                    }
-                }//根据type设置serverApk serverObb total长度, 并判断是否与服务器不同
-                if (!sameForServer) {
-                    Log.d(
-                        "FLP_DEBUG",
-                        "$type 文件 ${saveFile.name}(exists: ${saveFile.exists}) res.len:$totalLength saveFile.len:${saveFile.length}, 删除:${saveFile.delete()}"
-                    )
-                }//不同就提前删除
-
-                val inputStream = response.body()?.byteStream()
-                if ((inputStream == null) || (totalLength == null))
-                    return progress(-1f, "$type inputStream:$inputStream or totalLength:$totalLength not set", null)
-
-                when (type) {
-                    "apk" -> if (!needUpdateApk)
-                        return progress(1f, context.getString(R.string.downloadApkNoNeed), "btn.enable.$type")
-
-                    "obb" -> if (!needUpdateObb)
-                        return progress(1f, context.getString(R.string.downloadObbNoNeed), "btn.enable.$type")
+            when (fileType) {
+                "apk" -> {
+                    progressNotice = context.getString(R.string.downloadApkProgress)
                 }
 
-                val mThread = object : Thread() {
-                    override fun run() {
-                        inputStream.use { inputStream ->
-                            saveFile.saveToFile(
-                                inputStream,
-                                object : DownloadListener {
-                                    override fun onStart() {
-                                        Log.d("FLP_DEBUG", "onStart")
-                                    }
+                "obb" -> {
+                    progressNotice = context.getString(R.string.downloadObbProgress)
+                }
+            }//根据type设置progressNotice
 
-                                    override fun onProgress(currentLength: Long) {
-                                        val f = currentLength.toFloat() / totalLength.toFloat()
-                                        val i = progressNotice + "%.2f%%".format(f * 100)
-                                        progress(f, i, null)
-                                        Log.d("FLP_Download", "$i $currentLength/$totalLength")
-                                    }
+            val inputStream = res.body()?.byteStream() ?: return progress(
+                -1f,
+                "$fileType inputStream not set",
+                "update.common"
+            )
 
-                                    override fun onFinish() {
-                                        progress(
-                                            1f,
-                                            context.resString(if (type == "apk") R.string.downloadedApk else R.string.downloadedObb),
-                                            "btn.enable.$type"
-                                        )
-                                        Log.d("FLP_DEBUG", "onFinish: ${saveFile.fullFilePath}")
-                                    }
+//            when (fileType) {
+//                "apk" -> if (!needUpdateApk)
+//                    return progress(1f, context.getString(R.string.downloadApkNoNeed), "btn.enable.$fileType")
+//
+//                "obb" -> if (!needUpdateObb)
+//                    return progress(1f, context.getString(R.string.downloadObbNoNeed), "btn.enable.$fileType")
+//            }//TODO: 是否有必要在这里检查？
 
-                                    override fun onFailure(err: String) {
-                                        Log.e("FLP_DEBUG", "onFailure\n$err")
-//                                    progress(-1f, err)
-                                        progress(-1f, "on failure\n$err", "btn.enable.$type")
-                                    }
-                                }
+            Thread {
+                saveFile.saveToFile(inputStream, object : DownloadListener {
+                    override fun onStart() {
+                        Log.d("FLP_DEBUG", "DownloadListener onStart")
+                    }
+
+                    override fun onProgress(currentLength: Long): String? {
+                        val f = currentLength.toFloat() / fileLength.toFloat()
+                        val i = progressNotice + "%.2f%%".format(f * 100)
+                        progress(f, i, "update.progress.$fileType")
+                        return isBreak(null)
+                    }
+
+                    override fun onFinish() {
+                        Log.d("FLP_DEBUG", "onFinish: ${saveFile.fullFilePath}")
+                        if (fileType == "apk") {
+                            progress(1f, null, "update.progress.$fileType")
+                            saveFile.file.renameTo(apkFilePath.file)
+                            installApk(progress)
+                        } else {
+                            progress(1f, null, "update.progress.$fileType")
+                            Log.d(
+                                "FLP_DEBUG_downloadUtil",
+                                "obbFilePath.file.parentFile?.mkdirs: ${obbFilePath.file.parentFile?.mkdirs()} ${obbFilePath.mkDir()}"
                             )
-                        }
-
-                        if (type == "apk") {
-                            if (saveFile.length == serverApkLength) {
-                                installApk(cacheApkFile, progress)
-                                if (serverType == "jpServer") downloadObb(progress, saveFile)
-                            }
+                            saveFile.moveTo(obbFilePath)
                         }
                     }
-                }
-                mThread.start()
-                Log.d("FLP_DEBUG", "mThread already start")
-                context.showToastResId(R.string.downloadStart)
-            }
 
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                Log.e("FLP_DEBUG_Callback<ResponseBody>.onFailure", t.toString())
-                progress(-1f, context.resString(R.string.getError) + "\n" + t.toString(), "btn.enable.$type")
-                context.showToast(t.toString(), true)
-            }
+                    override fun onFailure(err: String) {
+                        Log.e("FLP_DEBUG_Thread", "saveToFile.onFailure\n$err")
+                        isBreak("$fileType on failure\n$err")
+                        progress(-1f, "$fileType on failure\n$err", "update.common")
+                    }
+                })
+            }.start()
+
+            Log.d("FLP_DEBUG", "$fileType mThread already start")
         }
 
-    private fun installApk(apkFile: FileUtil, progress: (p: Float, i: String?, e: String?) -> Unit) {
+
+        override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+            Log.e("FLP_DEBUG_Callback<ResponseBody>.onFailure", t.toString())
+            progress(-1f, context.getString(R.string.getError) + "\n" + t.toString(), "update.common")
+            context.showToast(t.toString(), true)
+        }
+    }
+
+    private fun installApk(progress: (p: Float, i: String?, e: String) -> Unit) {
         Analytics.trackEvent("installApk")
-        if (!apkFile.exists) return
-        progress(1f, context.resString(R.string.downloadedApk), null)
         try {
-            when {
-                apkFile.name.endsWith("apk") -> {
-                    installApplication(context, apkFile.file)
-                }
-            }
+            installApplication(context, apkFilePath.file)
         } catch (e: Throwable) {
             e.printStackTrace()
-            progress(-1f, e.toString(), null)
+            progress(-1f, e.toString(), "update.common")
         }
     }
 }

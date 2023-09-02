@@ -68,6 +68,8 @@ class ServerTypes {
         val version: String,
         @SerializedName("total")
         val total: Int,
+        @SerializedName("notice")
+        val notice: Notice,
     ) {
         data class BundleInfo(
             @SerializedName("id")
@@ -94,6 +96,17 @@ class ServerTypes {
                 val fileName: String?,
             )
         }
+
+        data class Notice(
+            @SerializedName("content")
+            val content: String,
+            @SerializedName("title")
+            val title: String,
+            @SerializedName("timeEnd")
+            val timeEnd: Long,
+            @SerializedName("timeStart")
+            val timeStart: Long,
+        )
     }
 
     data class WidgetInfoResponse(

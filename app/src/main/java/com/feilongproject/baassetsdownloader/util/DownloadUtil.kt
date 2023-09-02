@@ -17,7 +17,7 @@ import javax.net.ssl.X509TrustManager
 
 interface DownloadListener {
     fun onStart()
-    fun onProgress(currentLength: Long)
+    fun onProgress(currentLength: Long):String?
     fun onFinish()
     fun onFailure(err: String)
 }

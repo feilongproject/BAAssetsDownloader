@@ -33,9 +33,7 @@
     <string name="notInstallApk">未安装应用</string>
 
     <string name="helloMessage"><![CDATA[
-        碧蓝档案下载器(BAAssetsDownloader/BAAD)<br>
-        是一款专门用来下载手游《碧蓝档案》资源的app。<br>
-        可下载内容包括：apk安装包/obb数据包，资源包下载正在测试。<br>
+        这是一款专门用来下载手游《碧蓝档案》的app，并且现在已上线桌面小组件功能！<br>
         下载器已在<a href="https://github.com/feilongproject/BAAssetsDownloader">GitHub</a>开源，
         欢迎到<a href="https://afdian.net/a/feilongproject">爱发电平台</a>进行赞助!
     ]]></string>
@@ -48,8 +46,8 @@
     ]]></string>
     <string name="forAndroid11DownloadAssets">
         注意: \n
-        安卓11及以上设备由于储存权限更改，\n
-        下载数据包/资源包前请务必确认打开过一次游戏，\n
+        安卓11及以上系统由于储存权限更改，\n
+        下载资源包前请务必确认打开过一次游戏，\n
         否则在获取存储权限时会找不到数据包所在文件夹
     </string>
     <string name="downloadHelp">如果遇到下载失败的问题(如Connection reset/timeout)请使用科学上网方式加速下载。</string>
@@ -71,13 +69,10 @@
 
     <string name="download">下载</string>
     <string name="downloadStart">下载开始</string>
-    <string name="downloading">下载中</string>
-    <string name="downloaded">下载完毕</string>
-    <string name="downloadedObb">数据包下载完毕</string>
-    <string name="downloadedApk">安装包下载完毕</string>
-    <string name="downloadApk">下载安装包</string>
-    <string name="downloadApkStart">apk下载开始, 检查更新中</string>
-    <string name="downloadObbStart">obb下载开始, 检查更新中</string>
+    <string name="downloadError">下载出错\n%s</string>
+    <string name="downloadProgress">下载进度:(需要全部下载完之后才能打开游戏)\napk: %1$.2f%% %2$s</string>
+    <string name="downloadSuccess">下载完毕</string>
+    <string name="downloadApkObbStart">应用下载开始, 获取资源中</string>
     <string name="downloadBundlesStart">bundles下载开始, 检查更新中</string>
     <string name="downloadApkNoNeed">当前安装包版本已最新, 无需下载</string>
     <string name="downloadObbNoNeed">当前数据包版本已最新, 无需下载</string>
@@ -93,7 +88,8 @@
     <string name="getAssetsNum">已获取资源数量: %d</string>
     <string name="installAssets">下载资源包</string>
     <string name="assetsDownloadInfo">下载进度: %d/%d 失败次数: %d\n活动线程/最大线程: %d/%d</string>
-    <string name="downloadError">下载出错正在重试 %s</string>
+    <string name="downloadCancel">下载已取消</string>
+    <string name="assetsNotAlready">更新期间中无法下载资源包</string>
 
     <string name="localVersionName">本地版本名称:</string>
     <string name="localVersionCode">本地版本代码:</string>
@@ -108,13 +104,15 @@
     <string name="obbSameServerVersion">数据包与服务器版本匹配, 无需更新</string>
 
     <string name="selectFileDir">选择文件夹</string>
-    <string name="noStoragePermissionObb">无数据包存储权限, 请在系统设置中开启存储权限并重启应用</string>
+    <string name="noPermissionError">获取权限时出错</string>
+    <string name="noStoragePermission">请开启存储权限, 应用会在授权后重启</string>
     <string name="noStoragePermissionBundles">无资源包存储权限, 请在系统设置中开启存储权限并重启应用</string>
     <string name="noStoragePermission11">
         无存储权限\n
         请在打开界面中选择文件夹保存\n\n
         请务必保证打开过一次游戏\n
-        否则将无法选中
+        否则将无法选中\n\n
+        注意：授权结束之后因为要刷新应用授权状态，所以应用将会重启
     </string>
     <string name="getAllPermissions">已获取所有权限</string>
     <string name="notGetAllPermissions">未获取所有权限\n请按\"继续…\"进行授权\n或按\"强制继续\"忽略授权</string>

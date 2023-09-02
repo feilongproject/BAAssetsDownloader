@@ -34,10 +34,9 @@
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_provider_paths"/>
         </provider>
 
-        <activity
-                android:name=".MainActivity"
-                android:exported="true"
-                android:theme="@style/Theme.BAAssetsDownloader">
+        <activity android:name=".MainActivity"
+                  android:exported="true"
+                  android:theme="@style/Theme.BAAssetsDownloader">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

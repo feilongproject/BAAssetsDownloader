@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,189 +31,166 @@ import java.util.concurrent.atomic.AtomicReference
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: String) {
-    var assetLoadProgress by remember { mutableFloatStateOf(0f) }
-    var assetLoadStatus: String? by remember { mutableStateOf(null) }
-    var downloadProgress by remember { mutableFloatStateOf(0f) }
-    var showMultipleDownloadAssets by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    var versionCheckStatus by remember { mutableFloatStateOf(0f) }
+    var assetLoadStatus: String by remember { mutableStateOf("") }
+    var downloadProgress by remember { mutableStateOf(Pair(0f, 0f)) }
+    var showMultipleDownloadAssets by remember { mutableStateOf(false) }
     val apkAssetInfo: ApkAssetInfo? by remember { mutableStateOf(ApkAssetInfo(context, selectServer)) }
-    apkAssetInfo!!.versionCheck { p, i, _ ->
-        assetLoadProgress = p
-        downloadProgress = p
-        assetLoadStatus = i
-    }
-    var enableStatus by remember { mutableStateOf(Triple(true, true, true)) }
-    fun turnBtnStatus(e: String) {
-        val status = e.split(".")
-        Log.i("FLP_turnBtnStatus", status.toString())
-        val btnStatus = if (status[0] == "disable") false else if (status[0] == "enable") true else return
-        enableStatus = enableStatus.let {
-            if (status[1] == "apk") Triple(btnStatus, it.second, it.third)
-            else if (status[1] == "obb") Triple(it.first, btnStatus, it.third)
-            else if (status[1] == "assets") Triple(it.first, it.second, btnStatus)
-            else it
-        }
+    apkAssetInfo!!.versionCheck { p, i ->
+        versionCheckStatus = p
+        i?.let { assetLoadStatus = it }
     }
 
-    Log.d("FLP_DEBUG", "@Composable:PageDownload $selectServer")
+    Log.d("FLP_DEBUG", "@Composable:PageDownload $selectServer $padding")
 
-    Column(modifier = modifier.padding(paddingValues = padding).padding(vertical = 4.dp)) {
-        Surface(
-            color = MaterialTheme.colorScheme.primary,
-            modifier = maxWidth.padding(horizontal = 4.dp, vertical = 4.dp)
-        ) {
-            Column(modifier = maxWidth.padding(5.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.nowSelect).let {
-                        it + stringResource(if (selectServer == "jpServer") R.string.jpServer else R.string.globalServer)
-                    })
-                    AssistChip(
-                        onClick = {
-                            apkAssetInfo!!.versionCheck { p, i, _ ->
-                                assetLoadProgress = p
-                                downloadProgress = p
-                                assetLoadStatus = i
-                            }
-                        },
-                        label = { Text(stringResource(R.string.flash)) },
-                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-                    )//刷新
-                }
-                FlowRow(
-                    maxWidth,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    AssistChip(
-                        onClick = {
-                            apkAssetInfo!!.downloadApk { p, i, e ->
-                                downloadProgress = p
-                                assetLoadStatus = i
-                                if (e?.startsWith("btn.") == true) turnBtnStatus(e.substring(4))
-                            }
-                        },
-                        enabled = enableStatus.first,
-                        label = { Text(stringResource(R.string.downloadAndInstallApk)) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                    )//安装包
-                    AssistChip(
-                        enabled = (selectServer == "jpServer") && enableStatus.second,
-                        onClick = {
-                            apkAssetInfo!!.downloadObb({ p, i, e ->
-                                downloadProgress = p
-                                assetLoadStatus = i
-                                if (e?.startsWith("btn.") == true) turnBtnStatus(e.substring(4))
-                            })
-                        },
-                        label = { Text(stringResource(R.string.installObb)) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                    )//数据包
-                    AssistChip(
-                        enabled = (selectServer == "jpServer") && enableStatus.third,
-                        onClick = {
-                            showMultipleDownloadAssets = false
-                            apkAssetInfo!!.downloadAssets { p, i, e ->
-                                downloadProgress = p
-                                assetLoadStatus = i
-                                if (e == "downloadBundle") showMultipleDownloadAssets = true
-                            }
-                        },
-                        label = { Text(stringResource(R.string.getAssets)) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                    )//资源包
-                }
-                Divider(modifier = maxWidth.padding(top = 2.dp, bottom = 2.dp))
-                Text(stringResource(R.string.downloadHelp))
-                Divider(modifier = maxWidth.padding(top = 2.dp, bottom = 2.dp))
-                Text(stringResource(if (selectServer == "jpServer") R.string.downloadHelpJp else R.string.downloadHelpGlobal))
+    Surface(
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(paddingValues = padding)
+    ) {
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    Divider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
-                    Text(stringResource(R.string.forAndroid11DownloadAssets))
-                }
+        Column(modifier = maxWidth.padding(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.nowSelect).let {
+                    it + stringResource(if (selectServer == "jpServer") R.string.jpServer else R.string.globalServer)
+                })
+                AssistChip(
+                    onClick = {
+                        apkAssetInfo!!.versionCheck { p, i ->
+                            versionCheckStatus = p
+                            i?.let { assetLoadStatus = it }
+                        }
+                    },
+                    label = { Text(stringResource(R.string.flash)) },
+                    colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+                )//刷新
+            } // 显示当前选择和刷新按钮
+            FlowRow(maxWidth, horizontalArrangement = Arrangement.SpaceBetween) {
+                AssistChip(
+                    onClick = {
+                        assetLoadStatus = context.getString(R.string.downloadStart)
+                        apkAssetInfo!!.downloadApkObb { p, i, e ->
+                            Log.d("FLP_L", "$p $i $e")
 
-                Divider(modifier = maxWidth.padding(top = 2.dp, bottom = 1.dp))
-                Divider(modifier = maxWidth.padding(top = 1.dp, bottom = 2.dp))
-                Crossfade(targetState = assetLoadProgress, label = "") { p ->
-                    when (p) {
-                        1f, -1f -> Column {
-                            AssistChip(
-                                modifier = Modifier.padding(5.dp),
-                                onClick = {
-                                    apkAssetInfo!!.versionCheck { p, i, _ ->
-                                        assetLoadProgress = p
-                                        downloadProgress = p
-                                        assetLoadStatus = i
+                            if (e.startsWith("update.")) e.substring(7).let { ee ->
+                                if (ee.endsWith("common")) {
+                                    i?.let { assetLoadStatus = it }
+                                    when (p) {
+                                        -1f -> downloadProgress = Pair(-0.5f, -0.5f)
+                                        0f -> downloadProgress = Pair(0f, 0f)
+                                        else -> ""
                                     }
-                                },
-                                label = {
-                                    assetLoadStatus?.let { Text(it) }
-                                },
-                                leadingIcon = {
-                                    when (downloadProgress) {
-                                        1f -> Icon(Icons.Default.Done, stringResource(R.string.getSuccess))
-                                        -1f -> Icon(Icons.Default.Error, stringResource(R.string.getError))
-                                        else -> CircularProgressIndicator(
-                                            progress = downloadProgress,
-                                            modifier = Modifier.size(AssistChipDefaults.IconSize)/* color = Color.Blue*/
+                                } else downloadProgress.apply {
+                                    downloadProgress = if (first == -1f || second == -1f) Pair(-1f, -1f)
+                                    else (if (ee.endsWith("apk")) Pair(p / 2f, second) else Pair(first, p / 2f))
+                                }.apply {
+                                    if (first + second < 0f) i?.let { assetLoadStatus = it }
+                                    if (first + second >= 1f)
+                                        assetLoadStatus = context.getString(R.string.downloadSuccess)
+                                    else if (0f < first + second)
+                                        assetLoadStatus = context.getString(
+                                            R.string.downloadProgress,
+                                            downloadProgress.first * 200,
+                                            if (selectServer == "jpServer") "obb: %.2f%%".format(downloadProgress.second * 200) else ""
                                         )
-                                    }
-                                },
-                                colors = AssistChipDefaults.assistChipColors(containerColor = if (downloadProgress == -1f || p == -1f) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onPrimary)
-                            )
-                            val sNotFound = stringResource(R.string.notFound)
-                            Text(
-                                stringResource(R.string.serverVersionName) +
-                                        (apkAssetInfo?.serverVersionName ?: sNotFound)
-                            )
-                            Text(
-                                stringResource(R.string.localVersionName) + (apkAssetInfo?.localVersionName
-                                    ?: sNotFound)
-                            )
-                            if (apkAssetInfo?.needUpdateApk == true) Text(stringResource(R.string.apkNotSameServerVersion))
-                            else Text(stringResource(R.string.apkSameServerVersion))
-
-                            if (apkAssetInfo?.serverType == "jpServer") {
-                                if (apkAssetInfo?.localObbFile?.canWrite == false) {
-                                    Text(stringResource(R.string.obbNotSameServerVersionWithoutPermission))
-                                } else if (apkAssetInfo?.needUpdateObb == true) {
-                                    Text(stringResource(R.string.obbNotSameServerVersion))
-                                } else {
-                                    Text(stringResource(R.string.obbSameServerVersion))
                                 }
-                                //Text("${apkAssetInfo?.localObbFile?.length} == ${apkAssetInfo?.serverObbLength}")
                             }
                         }
+                    },
+                    enabled = downloadProgress.run { first + second }.let { it >= 1f || it <= 0f }
+                            && (versionCheckStatus == 1f),
+                    label = { Text(stringResource(R.string.downloadAndInstallApk)) },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                )//安装包
+                AssistChip(
+                    enabled = (selectServer == "jpServer") && (versionCheckStatus == 1f),
+                    onClick = {
+                        showMultipleDownloadAssets = false
+                        apkAssetInfo!!.downloadAssets { _, i, e ->
+                            i?.let { assetLoadStatus = it }
+                            if (e == "downloadBundle") showMultipleDownloadAssets = true
+                        }
+                    },
+                    label = { Text(stringResource(R.string.getAssets)) },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                )//资源包
+            } // 两个下载按钮
+            HorizontalDivider(modifier = maxWidth.padding(top = 2.dp, bottom = 2.dp))
 
-                        else -> {
-                            Row(
-                                maxWidth,
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                CircularProgressIndicator(color = Color.Blue)
-                                Text(stringResource(R.string.loading))
+            Text(stringResource(R.string.downloadHelp)) // 部分下载问题帮助
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                HorizontalDivider(modifier = maxWidth.padding(top = 5.dp, bottom = 5.dp))
+                Text(stringResource(R.string.forAndroid11DownloadAssets))
+            } // 安卓11及以上版本显示注意事项
+            HorizontalDivider(modifier = maxWidth.padding(top = 2.dp, bottom = 1.dp))
+            HorizontalDivider(modifier = maxWidth.padding(top = 1.dp, bottom = 2.dp))
+
+            Crossfade(targetState = versionCheckStatus, label = "") { p ->
+                if (p == 1f || p == -1f) downloadProgress.let {
+                    if (selectServer == "jpServer") it.first + it.second else it.first * 2
+                }.let { downloadAllProgress ->
+                    Column {
+                        AssistChip(
+                            modifier = Modifier.padding(5.dp),
+                            onClick = { },
+                            label = { Text(assetLoadStatus) },
+                            leadingIcon = {
+                                if (downloadAllProgress < 0f || p == -1f)
+                                    Icon(Icons.Default.Error, stringResource(R.string.getError))
+                                else if (downloadAllProgress == 0f || downloadAllProgress >= 1f)
+                                    Icon(Icons.Default.Done, stringResource(R.string.getSuccess))
+                                else CircularProgressIndicator(
+                                    progress = downloadAllProgress,
+                                    modifier = Modifier.size(AssistChipDefaults.IconSize),
+                                )
+                            },
+                            colors = AssistChipDefaults.assistChipColors(containerColor = if (downloadAllProgress < 0f || p == -1f) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onPrimary)
+                        )
+                        val sNotFound = stringResource(R.string.notFound)
+                        Text(
+                            stringResource(R.string.serverVersionName) + (apkAssetInfo?.serverVersionName ?: sNotFound)
+                        )
+                        Text(
+                            stringResource(R.string.localVersionName) + (apkAssetInfo?.localVersionName ?: sNotFound)
+                        )
+                        if (apkAssetInfo?.needUpdateApk == true) Text(stringResource(R.string.apkNotSameServerVersion))
+                        else Text(stringResource(R.string.apkSameServerVersion))
+
+                        if (apkAssetInfo?.serverType == "jpServer") {
+                            if (apkAssetInfo?.obbFilePath?.canWrite == false) {
+                                Text(stringResource(R.string.obbNotSameServerVersionWithoutPermission))
+                            } else if (apkAssetInfo?.needUpdateObb == true) {
+                                Text(stringResource(R.string.obbNotSameServerVersion))
+                            } else {
+                                Text(stringResource(R.string.obbSameServerVersion))
                             }
+                            //Text("${apkAssetInfo?.localObbFile?.length} == ${apkAssetInfo?.serverObbLength}")
                         }
                     }
+                } else {
+                    Row(
+                        maxWidth,
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(color = Color.Blue)
+                        Text(stringResource(R.string.loading))
+                    }
                 }
+            }
 //                Text("apkAssetInfo?.assetsBody: ${apkAssetInfo?.assetsBody?.version}")
 //                Text("showMultipleDownloadAssets: $showMultipleDownloadAssets")
-                if (showMultipleDownloadAssets) {
-                    apkAssetInfo?.assetsBody?.let {
-                        MultipleFileDownload(context, it)
-                    }
+            if (showMultipleDownloadAssets) {
+                apkAssetInfo?.assetsBody?.let {
+                    MultipleFileDownload(context, it)
                 }
             }
         }
@@ -223,7 +199,7 @@ fun PageDownload(modifier: Modifier, padding: PaddingValues, selectServer: Strin
 
 @Composable
 fun MultipleFileDownload(context: Context, assetsBody: ServerTypes.DownloadApiResponse) {
-    var activeThreads by remember { mutableStateOf(0) }
+    var activeThreads by remember { mutableIntStateOf(0) }
     val threadNum = Pref(context, "config").getValue("downloadThreadNum", 8)
     val maxRetry = Pref(context, "config").getValue("maxRetry", 3)
     val throttleProgress = ThrottleProgress(500)
@@ -455,9 +431,10 @@ fun downloadFile(
 //                                Log.d("FLP_DEBUG", "onStart")
                         }
 
-                        override fun onProgress(currentLength: Long) {
+                        override fun onProgress(currentLength: Long): String? {
                             val f = currentLength.toFloat() / totalLength.toFloat()
                             if (f != 1f) progress(f, "downloading", null)
+                            return null
 //                        Log.d("FLP_Download", "$assetName $currentLength/$totalLength")
                         }
 

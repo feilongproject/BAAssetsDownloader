@@ -85,8 +85,8 @@ dependencies {
     implementation("com.microsoft.appcenter:appcenter-distribute:5.0.2")
 
 //    implementation("androidx.glance:glance-material:1.0.0-rc01")
-    implementation("androidx.glance:glance-material3:1.0.0-rc01")
-    implementation("androidx.glance:glance-appwidget:1.0.0-rc01")
+//    implementation("androidx.glance:glance-material3:1.0.0-rc01")
+//    implementation("androidx.glance:glance-appwidget:1.0.0-rc01")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")

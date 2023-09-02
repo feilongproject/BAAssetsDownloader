@@ -28,16 +28,13 @@
     <string name="flash">flash</string>
     <string name="serverVersionName">"server version name: "</string>
     <string name="serverVersionCode">"server version code: "</string>
-    <string name="downloadApk">download apk</string>
     <string name="notFoundServerVersion">not found server version</string>
     <string name="apkNotSameServerVersion">not same server version, please update apk</string>
     <string name="apkSameServerVersion">same server version, not to update</string>
     <string name="getError">get error</string>
     <string name="getSuccess">get success</string>
     <string name="TODO">this TODO</string>
-    <string name="downloading">downloading</string>
-    <string name="downloaded">download finish</string>
-    <string name="downloadObbStart">obb download start, checking update</string>
+    <string name="downloadSuccess">download finish</string>
     <string name="installApk">install apk</string>
     <string name="installObb">install obb data</string>
     <string name="obbNotSameServerVersion">obb bot same server version, please update obb</string>
@@ -47,10 +44,8 @@
     <string name="forceContinue">force continue</string>
     <string name="forAndroid11HelloWindow">NO ENGLISH, USE CHINESE NOW!</string>
     <string name="forAndroid11DownloadAssets">NO ENGLISH, USE CHINESE NOW!</string>
-    <string name="downloadedObb">downloaded obb</string>
-    <string name="downloadedApk">downloaded apk</string>
     <string name="installAssets">download assets</string>
-    <string name="noStoragePermissionObb">NO ENGLISH, USE CHINESE NOW!</string>
+    <string name="noStoragePermission">NO ENGLISH, USE CHINESE NOW!</string>
     <string name="showThisWindow">Show This Window</string>
     <string name="customApiUrl">custom API</string>
     <string name="typeApiUrl">type API url</string>
@@ -62,7 +57,7 @@
     <string name="enter">enter</string>
     <string name="notShowAgainEnter">not show again</string>
     <string name="helloMessage">NO ENGLISH, USE CHINESE NOW!</string>
-    <string name="downloadApkStart">apk download start, checking update</string>
+    <string name="downloadApkObbStart">application download start, checking update</string>
     <string name="downloadApkProgress">apk download progress</string>
     <string name="downloadObbProgress">obb download progress</string>
     <string name="downloadHelpGlobal">NO ENGLISH, USE CHINESE NOW!</string>
@@ -86,14 +81,14 @@
     <string name="getting">getting</string>
     <string name="downloadBundlesStart">assets download start, checking update</string>
     <string name="noStoragePermissionBundles">NO ENGLISH, USE CHINESE NOW!</string>
-    <string name="downloadNotificationContent">%sdownload progress %d/%d fail: %d</string>
+    <string name="downloadNotificationContent">%s download progress %d/%d fail: %d</string>
     <string name="downloadNotificationChannelName">show download progress</string>
     <string name="downloadNotificationChannelDesc">show download progress</string>
-    <string name="downloadNotificationFinish">%sdownload finish</string>
+    <string name="downloadNotificationFinish">%s download finish</string>
     <string name="getAssets">get assets info</string>
     <string name="assetsDownloadInfo">progress: %d/%d thread: %d/%d</string>
     <string name="getAssetsNum">already assets num: %d</string>
-    <string name="downloadError">download fail: %s</string>
+    <string name="downloadError">download fail\n%s</string>
     <string name="notNumberWarn">only support number</string>
     <string name="threadNumber">thread number</string>
     <string name="checkingUpdate">checking update</string>
@@ -112,4 +107,8 @@
     <string name="widgetFlushing">updating</string>
     <string name="widgetFlushTime">%s updated</string>
     <string name="downloadNotificationTitle">download progress</string>
+    <string name="noPermissionError">get permission error</string>
+    <string name="downloadProgress">download progress\napk: %1$.2f%% %2$s</string>
+    <string name="downloadCancel">download cancel</string>
+    <string name="assetsNotAlready">in updating, assets not download</string>
 </resources>

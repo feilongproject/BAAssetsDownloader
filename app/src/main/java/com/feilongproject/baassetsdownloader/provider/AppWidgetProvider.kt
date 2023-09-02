@@ -23,11 +23,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.startActivity
-import androidx.glance.appwidget.action.actionStartActivity
 import com.feilongproject.baassetsdownloader.*
 import com.feilongproject.baassetsdownloader.pages.customApiUrl
 import com.feilongproject.baassetsdownloader.receiver.WidgetUpdateReceiver
-import com.feilongproject.baassetsdownloader.util.NOTIFICATION_GROUP_ID
 import com.feilongproject.baassetsdownloader.util.retrofitBuild
 import org.json.JSONObject
 import java.text.SimpleDateFormat

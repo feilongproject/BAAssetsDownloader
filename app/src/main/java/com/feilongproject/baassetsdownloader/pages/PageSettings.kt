@@ -50,7 +50,7 @@ fun PageSettings(modifier: Modifier, padding: PaddingValues) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(stringResource(R.string.checkUpdate), modifier = Modifier.padding(end = 5.dp).clickable {
-                    context.showToastResId(R.string.checkingUpdate)
+                    context.showToast(R.string.checkingUpdate)
                     Log.d("AppCenter", "开始版本检查")
                     Distribute.checkForUpdate()
                 })
@@ -157,7 +157,7 @@ fun SettingCustomDownloadThread(context: Context) {
             onValueChange = { v ->
                 Log.d("FLP_DEBUG", v.toString())
                 val setNum = v.text.toIntOrNull()
-                if (setNum == null && v.text != "") context.showToastResId(R.string.notNumberWarn)
+                if (setNum == null && v.text != "") context.showToast(R.string.notNumberWarn)
                 else {
                     pref.putValue("downloadThreadNum", setNum.let {
                         notNumber = setNum == null
