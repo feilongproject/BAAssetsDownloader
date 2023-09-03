@@ -1,16 +1,12 @@
 package com.feilongproject.baassetsdownloader.provider
 
-import android.Manifest
 import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
@@ -19,9 +15,6 @@ import android.os.Looper
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.startActivity
 import com.feilongproject.baassetsdownloader.*
 import com.feilongproject.baassetsdownloader.pages.customApiUrl
@@ -44,6 +37,8 @@ class WidgetProvider : AppWidgetProvider() {
         val alarmIntent = Intent(context, WidgetUpdateReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE)
         alarmManager.cancel(pendingIntent)
+        if (appWidgetIds.isEmpty()) return
+
         alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 10 * 60 * 1000, pendingIntent)
     }
 
@@ -175,7 +170,7 @@ class WidgetProvider : AppWidgetProvider() {
 
 
         SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()).format(Date()).let {
-            remoteViews.setTextViewText(R.id.weightFlushTime,context.getString (R.string.widgetFlushTime,it))
+            remoteViews.setTextViewText(R.id.weightFlushTime, context.getString(R.string.widgetFlushTime, it))
         } // 显示时间
 
         val serverType = pref.getValue("serverType", "jpServer")
