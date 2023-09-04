@@ -124,7 +124,7 @@
                        android:layout_height="200sp"
                        android:layout_gravity="center_horizontal"
                        android:src="@mipmap/widget_background"
-            android:scaleType="centerInside"/>
+                       android:scaleType="centerInside"/>
         </LinearLayout>
 
         <!--  取消/确认  -->

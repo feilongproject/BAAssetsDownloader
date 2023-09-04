@@ -26,11 +26,10 @@
             tools:targetApi="34"
             android:enableOnBackInvokedCallback="true">
 
-        <provider
-                android:name="androidx.core.content.FileProvider"
-                android:authorities="com.feilongproject.baassetsdownloader.FileProvider"
-                android:exported="false"
-                android:grantUriPermissions="true">
+        <provider android:name="androidx.core.content.FileProvider"
+                  android:authorities="com.feilongproject.baassetsdownloader.FileProvider"
+                  android:exported="false"
+                  android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_provider_paths"/>
         </provider>
 
@@ -46,7 +45,8 @@
         <!--  传统layout小组件  -->
         <receiver android:name=".provider.WidgetProvider"
                   android:enabled="true"
-                  android:exported="true">
+                  android:exported="true"
+                  android:label="@string/currentActivityEvent">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>

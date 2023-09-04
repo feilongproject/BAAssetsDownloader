@@ -149,7 +149,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AppCenter.start(
             application,
-            "8bf90af2-17c4-4bd1-a9fc-95f210978541",
+            BuildConfig.appCenterAppSecret,
             Analytics::class.java,
             Crashes::class.java,
             Distribute::class.java,

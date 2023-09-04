@@ -131,6 +131,7 @@
     <string name="downloadNotificationChannelDesc">使用进度条显示当前下载进度</string>
     <string name="downloadNotificationFinish">%s下载完毕</string>
 
+    <string name="currentActivityEvent">当前活动事件</string>
     <string name="widgetConfigNotice">注意：所有设置仅在保存后才会生效</string>
     <string name="selectServerType">选择服务器类型</string>
     <string name="selectAmbiguity">选择模糊度(0为无模糊，1为完全模糊)</string>

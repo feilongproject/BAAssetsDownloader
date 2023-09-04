@@ -111,4 +111,5 @@
     <string name="downloadProgress">download progress\napk: %1$.2f%% %2$s</string>
     <string name="downloadCancel">download cancel</string>
     <string name="assetsNotAlready">in updating, assets not download</string>
+    <string name="currentActivityEvent">"Current Activity Event"</string>
 </resources>

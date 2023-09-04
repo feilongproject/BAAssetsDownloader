@@ -38,7 +38,7 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             // 启用代码收缩、混淆和优化
             isMinifyEnabled = true
 
@@ -46,10 +46,13 @@ android {
             isShrinkResources = true
 
             // 与 Android Gradle 插件一起打包的默认 ProGuard 规则文件
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+
+            buildConfigField("String", "appCenterAppSecret", "\"8bf90af2-17c4-4bd1-a9fc-95f210978541\"")
+        }
+
+        debug {
+            buildConfigField("String", "appCenterAppSecret", "\"b5cdda8b-8c98-4095-bfb6-e5c96daf52b8\"")
         }
     }
 
@@ -66,6 +69,7 @@ android {
         compose = true
         dataBinding = true
         viewBinding = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -95,7 +99,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.0-alpha07")
     implementation("androidx.core:core-ktx:1.12.0-rc01")
     implementation("androidx.compose.ui:ui:1.6.0-alpha04")
-    implementation("androidx.compose.compiler:compiler:1.5.2")
+    implementation("androidx.compose.compiler:compiler:1.5.3")
     implementation("androidx.compose.foundation:foundation:1.6.0-alpha04")
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
     implementation("androidx.compose.material3:material3:1.2.0-alpha06")
