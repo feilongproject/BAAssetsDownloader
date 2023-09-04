@@ -29,7 +29,6 @@ android {
     }
 
     applicationVariants.all {
-        val buildType = buildType.name
         outputs.all {
             if (this is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
                 outputFileName = "BAAssetsDownloader-v${versionName}.apk"
@@ -91,6 +90,8 @@ dependencies {
 //    implementation("androidx.glance:glance-material:1.0.0-rc01")
 //    implementation("androidx.glance:glance-material3:1.0.0-rc01")
 //    implementation("androidx.glance:glance-appwidget:1.0.0-rc01")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("jp.wasabeef:glide-transformations:4.3.0")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")

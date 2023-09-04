@@ -1,5 +1,6 @@
 package com.feilongproject.baassetsdownloader.provider
 
+
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -7,39 +8,46 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import android.view.WindowManager
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.core.content.ContextCompat.startActivity
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.AppWidgetTarget
 import com.feilongproject.baassetsdownloader.*
 import com.feilongproject.baassetsdownloader.pages.customApiUrl
 import com.feilongproject.baassetsdownloader.receiver.WidgetUpdateReceiver
 import com.feilongproject.baassetsdownloader.util.retrofitBuild
-import org.json.JSONObject
+import com.microsoft.appcenter.analytics.Analytics
 import java.text.SimpleDateFormat
 import java.util.*
+import jp.wasabeef.glide.transformations.BlurTransformation
+import org.json.JSONObject
 
 
 class WidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        Log.d("FLP_DEBUG_WidgetProvider", "onUpdate(${appWidgetIds.contentToString()})")
+        Log.d("FLP_WidgetProvider", "onUpdate(${appWidgetIds.contentToString()})")
         super.onUpdate(context, appWidgetManager, appWidgetIds)
 
         for (appWidgetId in appWidgetIds) updateWidget(context, appWidgetManager, appWidgetId)
 
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = Intent(context, WidgetUpdateReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE)
-        alarmManager.cancel(pendingIntent)
-        if (appWidgetIds.isEmpty()) return
-
-        alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 10 * 60 * 1000, pendingIntent)
+//        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        val alarmIntent = Intent(context, WidgetUpdateReceiver::class.java)
+//        val pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE)
+//        alarmManager.cancel(pendingIntent)
+//        if (appWidgetIds.isEmpty()) {
+//            Log.d("FLP_WidgetProvider", "onUpdate: appWidgetIds.isEmpty()")
+//            return
+//        }
+//        alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 10 * 60 * 1000, pendingIntent)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -62,8 +70,10 @@ class WidgetProvider : AppWidgetProvider() {
         if (intent.action?.contains("UPDATE_CONFIGURE") == true) {
             Intent(context, WidgetConfigure::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                Log.d("FLP_DEBUG", "appWidgetId: ${intent.extras?.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID)}")
-//                setData()
+                Log.d(
+                    "FLP_WidgetProvider",
+                    "onReceive appWidgetId: ${intent.extras?.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID)}"
+                )
                 intent.extras?.let { putExtras(it) }
                 startActivity(context, this, null)
             }
@@ -77,6 +87,7 @@ class WidgetProvider : AppWidgetProvider() {
         super.onEnabled(context)
     }
 
+    private var isShowed = false
 
     fun updateWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
         Log.d("FLP_DEBUG_WidgetProvider", "updateWidget($appWidgetId) start")
@@ -87,22 +98,29 @@ class WidgetProvider : AppWidgetProvider() {
         R.id.widgetBackground.let { id ->
             val ambiguity = pref.getValue("ambiguity", 0)
             val transparency = pref.getValue("transparency", 100)
-            Log.d("FLP_DEBUG", "widgetConfig ambiguity: $ambiguity , transparency: $transparency")
 
-            // 设置透明度
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 remoteViews.setFloat(id, "setAlpha", transparency / 100f)  // only android 12 higher(included)
-            else
+            } else {
                 remoteViews.setInt(id, "setImageAlpha", (transparency * 2.55).toInt())  // only android 12 lower
+            } // 设置透明度
+            Log.d("FLP_DEBUG_updateWidget", "widgetConfig ambiguity: $ambiguity")
 
-            //  设置高斯模糊
-            remoteViews.setImageViewBitmap(
-                id,
-                (BitmapFactory.decodeResource(context.resources, R.mipmap.widget_background).let {
-                    Log.d("FLP_DEBUG", "updateAppWidget.overlay: ${it.width}x${it.height}")
-                    WidgetConfigure.blur(context, it, ambiguity / 4f)
-                })
-            )
+            AppWidgetTarget(context.applicationContext, id, remoteViews, appWidgetId).let { appWidgetTarget ->
+                Glide.with(context.applicationContext)
+                    .asBitmap()
+                    .load(R.mipmap.widget_background)
+                    .apply(RequestOptions.bitmapTransform(BlurTransformation(ambiguity / 4)))
+                    .override((context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.let {
+                        Log.d(
+                            "FLP_DEBUG_updateWidget",
+                            "defaultDisplay width: ${it.width} height: ${it.height} memory: ${it.width * it.height * 6}"
+                        )
+                        it.width * it.height * 6
+                    })
+                    .into(appWidgetTarget)
+            } // 设置高斯模糊
+            Log.d("FLP_DEBUG_updateWidget", "widgetConfig transparency: $transparency")
         } // 背景图处理
 
         Intent("${context.packageName}.UPDATE_WIDGET").let {
@@ -166,7 +184,10 @@ class WidgetProvider : AppWidgetProvider() {
         }
 
         widgetInfo()
-        appWidgetManager.updateAppWidget(appWidgetId, remoteViews)// 提前预览
+        if (!isShowed) {
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)// 提前预览
+            isShowed = true
+        } else Log.d("FLP_DEBUG_updateWidget", "isShowed, skip preview")
 
 
         SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()).format(Date()).let {
@@ -177,8 +198,9 @@ class WidgetProvider : AppWidgetProvider() {
 
         var threadError: Throwable? = null
         val thread = Thread {
-            if (Looper.myLooper() != Looper.getMainLooper()) Looper.prepare()
             try {
+                if (Looper.myLooper() != Looper.getMainLooper()) Looper.prepare()
+                Analytics.trackEvent("widgetInfo: $serverType")
                 val res = retrofitBuild(customApiUrl(context, "get", "")).create(ServerAPI::class.java)
                     .widgetInfo(ServerTypes.ServerTypeRequest(serverType))
                     .execute()
@@ -221,52 +243,10 @@ class WidgetProvider : AppWidgetProvider() {
 //        context.showToast(threadError.toString())
         widgetInfo()
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            val notificationManager = NotificationManagerCompat.from(context)
-//            val channel = NotificationChannel("23333", "ERROR_MESSAGE", NotificationManager.IMPORTANCE_LOW).apply {
-//                description = "description"
-//                setShowBadge(true)
-//            }
-//            notificationManager.createNotificationChannel(channel)
-//            val mBuilder = NotificationCompat.Builder(context, "23333")
-//                .setContentTitle(context.getString(R.string.getError)) // 标题
-//                .setContentText(threadError.toString()) // 文本
-//                .setSmallIcon(R.mipmap.ic_launcher) // 小图标
-//                .setPriority(NotificationCompat.PRIORITY_DEFAULT) // 7.0 设置优先级
-//                .setAutoCancel(true) // 是否自动消失（点击）or mManager.cancel(mNormalNotificationId)、cancelAll、setTimeoutAfter()
-//            notificationManager.notify(System.currentTimeMillis().toInt(), mBuilder.build())
-//        }
-
         appWidgetManager.updateAppWidget(appWidgetId, remoteViews)//  最终预览界面
         Log.d("FLP_DEBUG_WidgetProvider", "updateWidget end")
     }
 
-//    private val ACTION_AUTO_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE"
-//
-//    fun scheduleJob(context: Context) {
-//        val componentName = ComponentName(context, WidgetProvider::class.java)
-//        val jobInfo = JobInfo.Builder(0, componentName)
-//            .setOverrideDeadline(0)
-//            .build()
-//        val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-//        jobScheduler.schedule(jobInfo)
-//    }
-//
-//    fun startAutoUpdate(context: Context) {
-//        val intent = Intent(context, WidgetProvider::class.java)
-//        intent.setAction(ACTION_AUTO_UPDATE)
-//        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-//        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//        alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000, pendingIntent)
-//    }
-//
-//    fun stopAutoUpdate(context: Context) {
-//        val intent = Intent(context, WidgetProvider::class.java)
-//        intent.setAction(ACTION_AUTO_UPDATE)
-//        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-//        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//        alarmManager.cancel(pendingIntent)
-//    }
 }
 
 class AppWidgetService : RemoteViewsService() {

@@ -10,6 +10,7 @@ import android.util.Log
 
 class WidgetUpdateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        Log.d("FLP_WidgetUpdateReceiver","onReceive $intent ${intent.dataString} ${intent.extras}")
         updateWidget(context)
     }
 }
