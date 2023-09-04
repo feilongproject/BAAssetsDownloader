@@ -1,6 +1,8 @@
 # BAAD(BAAssestDownloader)
 
-[![Build status](https://build.appcenter.ms/v0.1/apps/21e307fb-b785-42ca-9038-e2c0b397549a/branches/main/badge)](https://install.appcenter.ms/users/feilongproject/apps/baad/distribution_groups/release)
+正式版：[![Release Build status](https://build.appcenter.ms/v0.1/apps/21e307fb-b785-42ca-9038-e2c0b397549a/branches/main/badge)](https://dl.schale.top/baad/release)
+
+测试版：[![Develop Build status](https://build.appcenter.ms/v0.1/apps/ee512ad8-69e7-4c06-83cb-7688926ca76f/branches/main/badge)](https://dl.schale.top/baad/develop)
 > **Unofficial** BlueArchive Assets Downloader
 
 > 碧蓝档案**非官方**资源下载器
